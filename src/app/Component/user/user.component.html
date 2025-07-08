@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestionSurveillance - ESPRIT</title>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-section">
+            <div class="logo-text">esprit</div>
+            <div class="logo-subtext">Se former autrement</div>
+            <div class="logo-honors">HONORS UNITED UNIVERSITIES</div>
+        </div>
+
+        <div class="left-section">
+            <h1 class="app-title">GestionSurveillance</h1>
+            <p class="app-subtitle">ESPRIT</p>
+        </div>
+
+        <div class="right-section">
+            <div class="auth-section">
+                <!-- Login Form -->
+                <div id="login-form">
+                    <h2 class="section-title">Connexion</h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="username" placeholder="Adresse e-mail" required>
+                            <div class="error-message" id="username-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-control" id="password" placeholder="Mot de passe" required>
+                            <div class="error-message" id="password-error"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Se connecter</button>
+                    </form>
+                    <div class="forgot-password">
+                        <a href="#" id="forgot-password-link">Mot de passe oublié ?</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            let isValid = true;
+
+            if (!username) {
+                showError('username', 'Veuillez saisir votre adresse e-mail');
+                isValid = false;
+            }
+
+            if (!password) {
+                showError('password', 'Veuillez saisir votre mot de passe');
+                isValid = false;
+            }
+
+            if (isValid) {
+                alert('Connexion réussie !');
+                console.log('Login:', { username, password });
+            }
+        });
+
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = document.getElementById(fieldId + '-error');
+            field.classList.add('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+    </script>
+</body>
+</html>
