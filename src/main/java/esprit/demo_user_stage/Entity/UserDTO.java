@@ -2,10 +2,31 @@ package esprit.demo_user_stage.Entity;
 
 public class UserDTO {
 
-private  Long id;
+    private  Long id;
+    private String matricule;
     private String token;
-
     private String role;
+    private String username;
+    private String email;
+
+
+
+
+    public String getMatricule() {
+        return matricule;
+    }
+
+    public void setMatricule(String matricule) {
+        this.matricule = matricule;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public Long getId() {
         return id;
@@ -13,16 +34,6 @@ private  Long id;
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    private String username;
-    private String email;
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getRole() {
@@ -33,6 +44,14 @@ private  Long id;
         this.role = role;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -40,18 +59,4 @@ private  Long id;
     public void setUsername(String username) {
         this.username = username;
     }
-
-
-
-
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-
 }

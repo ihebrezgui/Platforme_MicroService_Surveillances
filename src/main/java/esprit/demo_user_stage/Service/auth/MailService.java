@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MailService {
 
-
+    @Autowired
     private JavaMailSender mailSender;
 
     public void sendEmail(String to, String subject, String text) {
@@ -20,7 +20,7 @@ public class MailService {
 
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(text, true); // true = HTML content
+            helper.setText(text, true);
 
             mailSender.send(message);
         } catch (MessagingException e) {

@@ -44,4 +44,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         return null;
     }
 
+    //get users by id
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+
+
+    //get users by matricule
+    public User getUserByMatricule(String matricule) {
+    return userRepository.findByMatricule(matricule);
+    }
 }

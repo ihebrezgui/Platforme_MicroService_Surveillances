@@ -26,6 +26,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
     @Autowired
@@ -40,7 +41,7 @@ public class AuthController {
 
     @Autowired
     public AuthController(PasswordEncoder passwordEncoder, UserRepository userRepository,
-                          AuthenticationManager authenticationManager, CustomUserDetailsService userService ,PasswordResetTokenService tokenService,MailService mailService) {
+                          AuthenticationManager authenticationManager, CustomUserDetailsService userService, PasswordResetTokenService tokenService, MailService mailService) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
@@ -94,6 +95,7 @@ public class AuthController {
 
         return ResponseEntity.ok(userDTO);
     }
+
     @GetMapping("/me")
     public ResponseEntity<UserDetails> getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -105,7 +107,8 @@ public class AuthController {
     public String test() {
         return "message from backend successfully";
     }
-    // 📌 Endpoint pour demander la réinitialisation du mot de passe
+    // Endpoint pour demander la réinitialisation du mot de passe
+
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody UserDTO request) {
         Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
@@ -150,6 +153,16 @@ public class AuthController {
         userRepository.save(existingUser);
 
         return ResponseEntity.ok("Mot de passe réinitialisé avec succès !");
+    }
+
+    @GetMapping("/{id}")
+     public User getUserById(@PathVariable("id") Long id){
+        return userService.getUserById(id);
+    }
+
+    @GetMapping("/matricule/{matricule}")
+    public User getUserByMatricule(@PathVariable String matricule) {
+        return userService.getUserByMatricule(matricule);
     }
 
 }
