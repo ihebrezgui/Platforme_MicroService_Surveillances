@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
@@ -15,7 +17,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
-    @Override
+   /* @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -24,6 +26,19 @@ public class CustomUserDetailsService implements UserDetailsService {
         String roleName = "ROLE_" + user.getRole().name();  // si enum
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
+                .password(user.getPassword())
+                .roles(user.getRole().name())
+                .build();
+    }*/
+
+    @Override
+    public UserDetails loadUserByUsername(String matricule) throws UsernameNotFoundException {
+        User user = userRepository.findByMatricule(matricule);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with matricule: " + matricule);
+        }
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getMatricule())  // utiliser matricule ici
                 .password(user.getPassword())
                 .roles(user.getRole().name())
                 .build();
@@ -44,6 +59,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         return null;
     }
 
+
+
     //get users by id
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);
@@ -55,4 +72,45 @@ public class CustomUserDetailsService implements UserDetailsService {
     public User getUserByMatricule(String matricule) {
     return userRepository.findByMatricule(matricule);
     }
+
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+
+
+    public Long getUserIdByMatricule(String matricule) {
+        User user = userRepository.findByMatricule(matricule);
+        if (user != null) {
+            return user.getId();
+        }
+        return null;
+    }
+
+    public String getUserRoleByMatricule(String matricule) {
+        User user = userRepository.findByMatricule(matricule);
+        if (user != null) {
+            return user.getRole().name();
+        }
+        return null;
+    }
+
+    //get mail by matricule
+    public String getMailByMatricule(String matricule) {
+        User user = userRepository.findByMatricule(matricule);
+        if (user != null) {
+            return user.getEmail();
+        }
+        return null;
+    }
+    //get username by matricule
+    public String getUsernameByMatricule(String matricule) {
+        User user = userRepository.findByMatricule(matricule);
+        if (user != null) {
+            return user.getUsername();
+        }
+        return null;
+    }
+
 }

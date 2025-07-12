@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -61,7 +62,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/login")
+   /* @PostMapping("/login")
     public ResponseEntity<UserDTO> authenticate(@RequestBody User user) {
         System.out.println("Tentative de connexion pour l'utilisateur : " + user.getUsername());
 
@@ -92,6 +93,50 @@ public class AuthController {
         userDTO.setToken(token);
         userDTO.setId(userId);
         userDTO.setRole(role);
+
+
+        return ResponseEntity.ok(userDTO);
+    }
+*/
+
+    @PostMapping("/login")
+    public ResponseEntity<UserDTO> authenticate(@RequestBody Map<String, String> loginRequest) {
+        String matricule = loginRequest.get("matricule");
+        String password = loginRequest.get("password");
+
+        System.out.println("Tentative de connexion pour matricule : " + matricule);
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(matricule, password));
+        } catch (Exception e) {
+            System.out.println("Échec de l'authentification : " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        String token = JwtUtils.generateToken(matricule);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                matricule,
+                token, // credentials
+                null
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        Long userId = userService.getUserIdByMatricule(matricule);
+        String role = userService.getUserRoleByMatricule(matricule);
+        String email = userService.getMailByMatricule(matricule);
+        String username = userService.getUsernameByMatricule(matricule);
+
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setMatricule(matricule);
+        userDTO.setToken(token);
+        userDTO.setId(userId);
+        userDTO.setRole(role);
+        userDTO.setEmail(email);
+        userDTO.setUsername(username);
+
 
         return ResponseEntity.ok(userDTO);
     }
@@ -165,4 +210,10 @@ public class AuthController {
         return userService.getUserByMatricule(matricule);
     }
 
+    @GetMapping("/all")
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+  
 }
