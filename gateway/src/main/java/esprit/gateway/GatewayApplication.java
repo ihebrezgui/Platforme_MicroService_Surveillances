@@ -28,7 +28,16 @@ public class GatewayApplication {
 				.route("user-service",
 						r->r.path("/auth/**")
 								.uri("lb://user-service"))
+
+
+
+				.route("microserviceGestionDesSalles",
+						r->r.path("/salles/**" , "/reservations/**")
+								.uri("lb://microserviceGestionDesSalles"))
+
 				.build();
+
+
 
 	}
 }

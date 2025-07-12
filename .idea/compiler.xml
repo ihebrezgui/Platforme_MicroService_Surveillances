@@ -8,10 +8,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="demo_user_stage" />
-        <module name="configserver" />
-        <module name="microservice1" />
+        <module name="microserviceGestionDesFraude" />
+        <module name="microserviceGestionDesSalles" />
         <module name="eureka" />
+        <module name="microserviceGestionDesNotifications" />
+        <module name="configserver" />
+        <module name="microserviceEmploiDuTemps" />
         <module name="gateway" />
+        <module name="microserviceSurveillanceDesExamens" />
       </profile>
     </annotationProcessing>
   </component>
@@ -21,7 +25,11 @@
       <module name="demo_user_stage" options="-parameters" />
       <module name="eureka" options="-parameters" />
       <module name="gateway" options="-parameters" />
-      <module name="microservice1" options="-parameters" />
+      <module name="microserviceEmploiDuTemps" options="-parameters" />
+      <module name="microserviceGestionDesFraude" options="-parameters" />
+      <module name="microserviceGestionDesNotifications" options="-parameters" />
+      <module name="microserviceGestionDesSalles" options="-parameters" />
+      <module name="microserviceSurveillanceDesExamens" options="-parameters" />
     </option>
   </component>
 </project>
