@@ -1,6 +1,5 @@
+
 package esprit.microservicegestiondessalles.Entity;
-
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,24 +7,22 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "reservations_salle")
-@Data
+@Table(name = "emploi_Enseignant")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReservationSalle {
+public class EmploiDuTemps {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDate dateExamen;
+    private Long enseignantId;
+    private LocalDate date;
     private LocalTime heureDebut;
     private LocalTime heureFin;
-    private Long enseignantId;
-    private String unitePedagogique;
+    private String typeActivite; // cours, soutenance, surveillance, etc.
 
 
-    @ManyToOne
-    @JoinColumn(name = "salle_id")
-    private Salle salle;
 }

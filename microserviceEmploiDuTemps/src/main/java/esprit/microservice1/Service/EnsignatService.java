@@ -1,15 +1,14 @@
     package esprit.microservice1.Service;
 
 
-    import esprit.microservice1.Entity.EmploiDuTemps;
     import esprit.microservice1.Entity.Enseignant;
     import esprit.microservice1.Repository.EnsignatRepository;
     import esprit.microservice1.UserClient;
     import esprit.microservice1.UserDTO;
-    import lombok.AllArgsConstructor;
     import org.springframework.stereotype.Service;
 
     import java.util.List;
+    import java.util.Optional;
 
     @Service
 
@@ -53,7 +52,9 @@
             return enseignantRepository.findAll();
         }
 
-
+        public Optional<Enseignant> getEnseignantById(Long id) {
+            return enseignantRepository.findById(id);
+        }
 
 
     }

@@ -1,8 +1,7 @@
 package esprit.microservice1.Repository;
 
 
-import esprit.microservice1.Entity.EmploiDuTemps;
-import esprit.microservice1.Entity.Enseignant;
+import esprit.microservice1.Entity.EmploiDuSurveillance;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,17 +12,17 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Repository
-public interface EmploiDuTempsRepository extends JpaRepository<EmploiDuTemps, Long> {
+public interface EmploiDuTempsRepository extends JpaRepository<EmploiDuSurveillance, Long> {
 
 
 
-    List<EmploiDuTemps> findByEnseignantIdAndDateBetween(Long enseignantId, LocalDate debut, LocalDate fin);
-    List<EmploiDuTemps> findByEnseignantId(Long enseignantId);
-    List<EmploiDuTemps> findBySalleId(Long salleId);
+    List<EmploiDuSurveillance> findByEnseignantIdAndDateBetween(Long enseignantId, LocalDate debut, LocalDate fin);
+    List<EmploiDuSurveillance> findByEnseignantId(Long enseignantId);
+    List<EmploiDuSurveillance> findBySalleId(Long salleId);
 
     @Query("""
     SELECT COUNT(DISTINCT e.enseignant.id)
-    FROM EmploiDuTemps e
+    FROM EmploiDuSurveillance e
     WHERE e.salleId = :salleId
       AND e.date = :date
       AND e.heureDebut < :heureFin

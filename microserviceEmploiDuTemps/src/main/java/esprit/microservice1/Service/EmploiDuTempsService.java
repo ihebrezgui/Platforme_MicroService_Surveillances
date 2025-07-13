@@ -1,6 +1,6 @@
 package esprit.microservice1.Service;
 
-import esprit.microservice1.Entity.EmploiDuTemps;
+import esprit.microservice1.Entity.EmploiDuSurveillance;
 import esprit.microservice1.Entity.Enseignant;
 import esprit.microservice1.Entity.HeuresManquantes;
 import esprit.microservice1.Repository.EmploiDuTempsRepository;
@@ -44,9 +44,9 @@ public class EmploiDuTempsService {
             fin = LocalDate.of(annee, 12, 31);
         }
 
-        List<EmploiDuTemps> surveillances = emploiRepository.findByEnseignantIdAndDateBetween(enseignantId, debut, fin);
+        List<EmploiDuSurveillance> surveillances = emploiRepository.findByEnseignantIdAndDateBetween(enseignantId, debut, fin);
         float totalHeures = 0;
-        for (EmploiDuTemps e : surveillances) {
+        for (EmploiDuSurveillance e : surveillances) {
             totalHeures += Duration.between(e.getHeureDebut(), e.getHeureFin()).toMinutes() / 60f;
         }
         return totalHeures;
@@ -81,7 +81,7 @@ public class EmploiDuTempsService {
     }
 
     // --- Méthode principale pour planifier la surveillance, avec équilibrage
-    public EmploiDuTemps planifierSurveillance(EmploiDuTemps surveillance) {
+    public EmploiDuSurveillance planifierSurveillance(EmploiDuSurveillance surveillance) {
         if (surveillance.getEnseignant() == null || surveillance.getEnseignant().getId() == null) {
             throw new RuntimeException("L'enseignant doit être renseigné avec un id valide.");
         }
@@ -122,7 +122,7 @@ public class EmploiDuTempsService {
             throw new RuntimeException("Heures de surveillance planifiées dépassent la moyenne autorisée pour ce semestre (" + seuilMaxSemestre + "h).");
         }
 
-        EmploiDuTemps saved = emploiRepository.save(surveillance);
+        EmploiDuSurveillance saved = emploiRepository.save(surveillance);
 
         // Calcul des heures manquantes restantes à la fin du semestre (min 0)
         float heuresManquantes = (MOYENNE_ANNUELLE / 2) - (heuresSurveillanceSemestre + heuresNouvelle);
@@ -134,7 +134,7 @@ public class EmploiDuTempsService {
     }
 
     // --- Liste des surveillances par enseignant
-    public List<EmploiDuTemps> getSurveillancesParEnseignant(Long enseignantId) {
+    public List<EmploiDuSurveillance> getSurveillancesParEnseignant(Long enseignantId) {
         return emploiRepository.findByEnseignantId(enseignantId);
     }
 

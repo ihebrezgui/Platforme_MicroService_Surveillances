@@ -36,4 +36,11 @@ public class EnsignatController {
                 .orElseThrow(() -> new RuntimeException("Aucun enseignant trouvé avec ce matricule"));
     }
 
+    @GetMapping("/id/{id}")
+    public ResponseEntity<Enseignant> getEnseignantById(@PathVariable Long id) {
+        return ensignatService.getEnseignantById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

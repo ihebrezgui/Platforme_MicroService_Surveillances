@@ -5,6 +5,7 @@ import esprit.microservicegestiondessalles.EnseignantDTO;
 import esprit.microservicegestiondessalles.Entity.HistoriqueReservation;
 import esprit.microservicegestiondessalles.Entity.ReservationSalle;
 import esprit.microservicegestiondessalles.Entity.Salle;
+import esprit.microservicegestiondessalles.Repository.EmploiDuTempsRepository;
 import esprit.microservicegestiondessalles.Repository.HistoriqueReservationRepository;
 import esprit.microservicegestiondessalles.Repository.ReservationSalleRepository;
 import esprit.microservicegestiondessalles.Repository.SalleRepository;
@@ -24,6 +25,7 @@ public class ReservationSalleService {
 
     private final ReservationSalleRepository reservationRepository;
     private final HistoriqueReservationRepository historiqueRepository;
+    private final EmploiDuTempsRepository emploiDuTempsRepository;
     private final SalleRepository salleRepository;
     private final UserClient userClient;
     private final EnseignantClient enseignantClient;
@@ -38,6 +40,12 @@ public class ReservationSalleService {
             throw new RuntimeException("Utilisateur non trouvé avec matricule : " + matricule);
         }
         return user.getId();
+    }
+
+    public boolean isEnseignantDisponible(Long enseignantId, LocalDate date, LocalTime debut, LocalTime fin) {
+        int emploiConflits = emploiDuTempsRepository.countConflits(enseignantId, date, debut, fin);
+        int reservationConflits = reservationRepository.countConflits(enseignantId, date, debut, fin);
+        return emploiConflits == 0 && reservationConflits == 0;
     }
 
     public ReservationSalle createReservation(ReservationSalle reservation, String matricule, String typeAction) {
@@ -56,6 +64,9 @@ public class ReservationSalleService {
         EnseignantDTO enseignant = enseignantClient.getEnseignantByMatricule(matricule);
         if (enseignant == null) {
             throw new RuntimeException("Enseignant non trouvé avec matricule : " + matricule);
+        }
+        if (!isEnseignantDisponible(enseignant.getId(), date, debut, fin)) {
+            throw new RuntimeException("Enseignant non disponible sur ce créneau.");
         }
 
         // Mettre à jour l'enseignantId avec l'ID réel de l'enseignant (pas user_id)
@@ -130,4 +141,7 @@ public ReservationSalle updateReservation(Long id, ReservationSalle reservationD
     public List<HistoriqueReservation> getHistoriqueByReservation(Long reservationId) {
         return historiqueRepository.findByReservationIdOrderByDateModificationDesc(reservationId);
     }
+
+
+
 }

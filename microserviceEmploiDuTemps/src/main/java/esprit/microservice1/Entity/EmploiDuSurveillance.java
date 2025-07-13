@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EmploiDuTemps {
+public class EmploiDuSurveillance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

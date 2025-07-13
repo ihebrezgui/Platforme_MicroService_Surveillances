@@ -16,16 +16,17 @@ public interface ReservationSalleRepository extends JpaRepository<ReservationSal
 
 
 
-    @Query("""
-    select count(distinct r.enseignantId)
-    from ReservationSalle r
-    where r.salle.id = :salleId
-      and r.dateExamen = :date
-      and (r.heureDebut < :heureFin and r.heureFin > :heureDebut)
-""")
+    @Query("SELECT COUNT(r) FROM ReservationSalle r WHERE r.enseignantId = :enseignantId AND r.dateExamen = :date " +
+            "AND ( (r.heureDebut < :heureFin) AND (r.heureFin > :heureDebut) )")
+    int countConflits(@Param("enseignantId") Long enseignantId,
+                      @Param("date") LocalDate date,
+                      @Param("heureDebut") LocalTime heureDebut,
+                      @Param("heureFin") LocalTime heureFin);
+
+    @Query("SELECT COUNT(r.salle) FROM ReservationSalle r WHERE r.salle.id = :salleId AND r.dateExamen = :date " +
+            "AND ( (r.heureDebut < :heureFin) AND (r.heureFin > :heureDebut) )")
     int countEnseignantsReservantSallePourPeriode(@Param("salleId") Long salleId,
                                                   @Param("date") LocalDate date,
                                                   @Param("heureDebut") LocalTime heureDebut,
                                                   @Param("heureFin") LocalTime heureFin);
-
 }

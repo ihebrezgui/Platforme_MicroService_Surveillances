@@ -1,0 +1,53 @@
+package esprit.microservicegestiondesfraude.Controller;
+
+import esprit.microservicegestiondesfraude.Entity.Fraude;
+import esprit.microservicegestiondesfraude.Entity.StatutFraude;
+import esprit.microservicegestiondesfraude.Service.FraudeService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/fraudes")
+@AllArgsConstructor
+public class FraudeController {
+
+    private final FraudeService fraudeService;
+
+    // Signaler une nouvelle fraude
+    @PostMapping
+    public ResponseEntity<Fraude> signalerFraude(@RequestBody Fraude fraude) {
+        Fraude nouvelleFraude = fraudeService.signalerFraude(fraude);
+        return ResponseEntity.ok(nouvelleFraude);
+    }
+
+    // Récupérer toutes les fraudes en cours
+    @GetMapping("/encours")
+    public ResponseEntity<List<Fraude>> getFraudesEnCours() {
+        List<Fraude> fraudes = fraudeService.getFraudesEnCours();
+        return ResponseEntity.ok(fraudes);
+    }
+
+    // Récupérer toutes les fraudes signalées par un utilisateur (matricule)
+    @GetMapping("/utilisateur/{matricule}")
+    public ResponseEntity<List<Fraude>> getFraudesParMatricule(@PathVariable String matricule) {
+        List<Fraude> fraudes = fraudeService.getFraudesParMatricule(matricule);
+        return ResponseEntity.ok(fraudes);
+    }
+
+    // Traiter une fraude (mettre un rapport et statut RESOLUE)
+    @PutMapping("/{id}/traiter")
+    public ResponseEntity<Fraude> traiterFraude(@PathVariable Long id, @RequestBody String rapport) {
+        Fraude fraudeTraitee = fraudeService.traiterFraude(id, rapport);
+        return ResponseEntity.ok(fraudeTraitee);
+    }
+
+    // Archiver une fraude (changer statut à ARCHIVEE)
+    @PutMapping("/{id}/archiver")
+    public ResponseEntity<Void> archiverFraude(@PathVariable Long id) {
+        fraudeService.archiverFraude(id);
+        return ResponseEntity.noContent().build();
+    }
+}

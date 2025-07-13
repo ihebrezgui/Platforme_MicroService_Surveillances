@@ -2,7 +2,7 @@ package esprit.microservice1.Controller;
 
 
 
-import esprit.microservice1.Entity.EmploiDuTemps;
+import esprit.microservice1.Entity.EmploiDuSurveillance;
 import esprit.microservice1.SalleDTO;
 import esprit.microservice1.Service.EmploiDuTempsService;
 import lombok.AllArgsConstructor;
@@ -13,15 +13,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/emplois")
 @AllArgsConstructor
+@CrossOrigin("*")
 public class EmploiDuTempsController {
 
     private final EmploiDuTempsService emploiService;
 
 
     @PostMapping("/planifier")
-    public ResponseEntity<?> planifier(@RequestBody EmploiDuTemps surveillance) {
+    public ResponseEntity<?> planifier(@RequestBody EmploiDuSurveillance surveillance) {
         try {
-            EmploiDuTemps saved = emploiService.planifierSurveillance(surveillance);
+            EmploiDuSurveillance saved = emploiService.planifierSurveillance(surveillance);
             return ResponseEntity.ok(saved);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -29,7 +30,7 @@ public class EmploiDuTempsController {
     }
 
     @GetMapping("/enseignant/{id}")
-    public List<EmploiDuTemps> getSurveillancesParEnseignant(@PathVariable Long id) {
+    public List<EmploiDuSurveillance> getSurveillancesParEnseignant(@PathVariable Long id) {
         return emploiService.getSurveillancesParEnseignant(id);
     }
 
