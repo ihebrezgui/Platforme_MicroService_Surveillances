@@ -16,10 +16,8 @@ public class Salle {
 
     @Column(nullable = false, unique = true)
     private String nom;
-
     private int capacite;
 
-    private String localisation;
-
-    private String description;
+    private String bloc;
+    private int etage;
 }

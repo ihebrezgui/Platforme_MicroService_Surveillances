@@ -1,5 +1,5 @@
+package esprit.microservice1.Entity;
 
-package esprit.microservicegestiondessalles;
 
 import lombok.Data;
 
@@ -10,8 +10,27 @@ public class EnseignantDTO {
     private String prenom;
     private String email;
     private String telephone;
-    private Long userId;
     private String matricule;
+    private String role;
+    private String moduleLibelle;
+    private Long moduleId; // le nom du module
+    private String unitePedagogiqueLibelle;
+
+    public String getUnitePedagogiqueLibelle() {
+        return unitePedagogiqueLibelle;
+    }
+
+    public void setUnitePedagogiqueLibelle(String unitePedagogiqueLibelle) {
+        this.unitePedagogiqueLibelle = unitePedagogiqueLibelle;
+    }
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
 
     public String getEmail() {
         return email;
@@ -37,7 +56,13 @@ public class EnseignantDTO {
         this.matricule = matricule;
     }
 
+    public String getModuleLibelle() {
+        return moduleLibelle;
+    }
 
+    public void setModuleLibelle(String moduleLibelle) {
+        this.moduleLibelle = moduleLibelle;
+    }
 
     public String getNom() {
         return nom;
@@ -70,16 +95,4 @@ public class EnseignantDTO {
     public void setTelephone(String telephone) {
         this.telephone = telephone;
     }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    private String role;
-
-    private ModuleDTO module;
 }

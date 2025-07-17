@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 
 @Repository
@@ -19,4 +20,8 @@ public interface EmploiDuTempsRepository extends JpaRepository<EmploiDuTemps, Lo
                       @Param("date") LocalDate date,
                       @Param("heureDebut") LocalTime heureDebut,
                       @Param("heureFin") LocalTime heureFin);
+
+
+    List<EmploiDuTemps> findByEnseignantId(Long enseignantId);
+
 }

@@ -11,8 +11,11 @@ import esprit.microservicegestiondessalles.Repository.ReservationSalleRepository
 import esprit.microservicegestiondessalles.Repository.SalleRepository;
 import esprit.microservicegestiondessalles.UserClient;
 import esprit.microservicegestiondessalles.UserDTO;
+import feign.FeignException;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,10 +40,11 @@ public class ReservationSalleService {
     public Long getUserIdByMatricule(String matricule) {
         UserDTO user = userClient.getUserByMatricule(matricule);
         if (user == null) {
-            throw new RuntimeException("Utilisateur non trouvé avec matricule : " + matricule);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé avec matricule : " + matricule);
         }
         return user.getId();
     }
+
 
     public boolean isEnseignantDisponible(Long enseignantId, LocalDate date, LocalTime debut, LocalTime fin) {
         int emploiConflits = emploiDuTempsRepository.countConflits(enseignantId, date, debut, fin);
@@ -54,37 +58,38 @@ public class ReservationSalleService {
         LocalTime debut = reservation.getHeureDebut();
         LocalTime fin = reservation.getHeureFin();
 
-        // Vérifier le nombre d'enseignants déjà réservés
         int nbEnseignants = reservationRepository.countEnseignantsReservantSallePourPeriode(salleId, date, debut, fin);
         if (nbEnseignants >= 2) {
-            throw new RuntimeException("Limite de 2 enseignants maximum pour cette salle et ce créneau atteinte.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Limite de 2 enseignants maximum pour cette salle et ce créneau atteinte.");
         }
 
-        // ✅ Récupérer l'enseignant via son matricule
-        EnseignantDTO enseignant = enseignantClient.getEnseignantByMatricule(matricule);
-        if (enseignant == null) {
-            throw new RuntimeException("Enseignant non trouvé avec matricule : " + matricule);
+        EnseignantDTO enseignant;
+        try {
+            enseignant = enseignantClient.getEnseignantByMatricule(matricule);
+        } catch (FeignException e) {
+            if (e.status() == 404) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Enseignant non trouvé avec matricule : " + matricule);
+            } else {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erreur lors de la récupération de l'enseignant.");
+            }
         }
+
         if (!isEnseignantDisponible(enseignant.getId(), date, debut, fin)) {
-            throw new RuntimeException("Enseignant non disponible sur ce créneau.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enseignant non disponible sur ce créneau.");
         }
 
-        // Mettre à jour l'enseignantId avec l'ID réel de l'enseignant (pas user_id)
         reservation.setEnseignantId(enseignant.getId());
 
-        // Récupérer la salle depuis le repo
         Salle salle = salleRepository.findById(salleId)
-                .orElseThrow(() -> new RuntimeException("Salle non trouvée avec id : " + salleId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Salle non trouvée avec id : " + salleId));
         reservation.setSalle(salle);
 
-        // Sauvegarde de la réservation
         ReservationSalle saved = reservationRepository.save(reservation);
 
-        // Historiser l'action
         HistoriqueReservation historique = HistoriqueReservation.builder()
                 .dateModification(LocalDateTime.now())
                 .typeAction(typeAction)
-                .utilisateurId(enseignant.getUserId()) // ici on peut aussi stocker l'utilisateur lié si nécessaire
+                .utilisateurId(enseignant.getUserId())
                 .reservation(saved)
                 .build();
         historiqueRepository.save(historique);
@@ -104,8 +109,7 @@ public ReservationSalle updateReservation(Long id, ReservationSalle reservationD
         reservation.setHeureDebut(reservationDetails.getHeureDebut());
         reservation.setHeureFin(reservationDetails.getHeureFin());
         reservation.setEnseignantId(reservationDetails.getEnseignantId());
-        reservation.setUnitePedagogique(reservationDetails.getUnitePedagogique()); // adapte si tu as unitePedagogiqueId
-        reservation.setEtat(reservationDetails.getEtat());
+
         reservation.setSalle(reservationDetails.getSalle());
 
         ReservationSalle updated = reservationRepository.save(reservation);

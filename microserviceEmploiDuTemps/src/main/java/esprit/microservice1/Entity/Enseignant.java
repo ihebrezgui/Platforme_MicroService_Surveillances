@@ -1,5 +1,6 @@
 package esprit.microservice1.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,13 +22,15 @@ public class Enseignant {
     private String prenom;
     private String email;
     private String telephone;
-
     private Long userId;
     private String matricule;
     private String role;
 
+    @Transient
+    private Long moduleId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "module_id")
-    private Module module;
+    @JsonIgnoreProperties("enseignants")
+    private MyModule myModule;
 }

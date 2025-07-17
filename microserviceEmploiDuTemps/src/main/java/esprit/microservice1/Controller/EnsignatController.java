@@ -1,11 +1,14 @@
 package esprit.microservice1.Controller;
 
-
 import esprit.microservice1.Entity.Enseignant;
+import esprit.microservice1.Entity.EnseignantDTO;
+import esprit.microservice1.Entity.MyModule;
+import esprit.microservice1.Entity.UnitePedagogique;
 import esprit.microservice1.Repository.EnsignatRepository;
 import esprit.microservice1.Service.EnsignatService;
+import esprit.microservice1.Service.ModuleService;
+import esprit.microservice1.Service.UnitePedagogiqueService;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +20,15 @@ import java.util.List;
 @CrossOrigin("*")
 public class EnsignatController {
 
-    EnsignatService ensignatService;
-    EnsignatRepository enseignantRepository;
+    private final EnsignatService ensignatService;
+    private final EnsignatRepository enseignantRepository;
+    private final ModuleService moduleService;
+
+    private final UnitePedagogiqueService unitePedagogiqueService;
+    @GetMapping("/unite-pedagogiques")
+    public List<UnitePedagogique> getAllUnites() {
+        return unitePedagogiqueService.getAllUnites();
+    }
 
     @PostMapping("/addEnsignat")
     public Enseignant addEnsignat(@RequestBody Enseignant e) {
@@ -26,8 +36,8 @@ public class EnsignatController {
     }
 
     @GetMapping("/getAllEnseignants")
-    public List<Enseignant> getAllEnseignants() {
-        return ensignatService.getAllEnseignants();
+    public List<EnseignantDTO> getAllEnseignants() {
+        return ensignatService.getAllEnseignantsAvecModule();
     }
 
     @GetMapping("/matricule/{matricule}")
@@ -43,4 +53,8 @@ public class EnsignatController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/modules")
+    public List<MyModule> getAllModules() {
+        return moduleService.getAllModules();
+    }
 }

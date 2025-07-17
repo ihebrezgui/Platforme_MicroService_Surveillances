@@ -38,10 +38,12 @@ public class SalleService {
     public Salle updateSalle(Long id, Salle salleDetails) {
         Salle salle = salleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Salle non trouvée"));
+
         salle.setNom(salleDetails.getNom());
         salle.setCapacite(salleDetails.getCapacite());
-        salle.setLocalisation(salleDetails.getLocalisation());
-        salle.setDescription(salleDetails.getDescription());
+        salle.setBloc(salleDetails.getBloc());
+        salle.setEtage(salleDetails.getEtage());
+
         return salleRepository.save(salle);
     }
 

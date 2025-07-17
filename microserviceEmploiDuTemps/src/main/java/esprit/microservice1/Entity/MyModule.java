@@ -1,7 +1,10 @@
 package esprit.microservice1.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "module")
@@ -10,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Module {
+public class MyModule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,5 +26,11 @@ public class Module {
 
     @ManyToOne
     @JoinColumn(name = "unite_pedagogique_id")
+    @JsonIgnoreProperties("modules")
     private UnitePedagogique unitePedagogique;
+
+
+
+    @OneToMany(mappedBy = "myModule", cascade = CascadeType.ALL)
+    private List<Enseignant> enseignants; // ⚠️ Liste des enseignants du module
 }

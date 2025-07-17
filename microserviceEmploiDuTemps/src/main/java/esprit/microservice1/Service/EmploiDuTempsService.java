@@ -2,8 +2,10 @@ package esprit.microservice1.Service;
 
 import esprit.microservice1.Entity.EmploiDuSurveillance;
 import esprit.microservice1.Entity.Enseignant;
+import esprit.microservice1.Entity.Groupe;
 import esprit.microservice1.Entity.HeuresManquantes;
 import esprit.microservice1.Repository.EmploiDuTempsRepository;
+import esprit.microservice1.Repository.GroupeRepository;
 import esprit.microservice1.Repository.HeuresManquantesRepository;
 import esprit.microservice1.Repository.EnsignatRepository;
 import esprit.microservice1.ReservationClient;
@@ -17,6 +19,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -27,6 +30,7 @@ public class EmploiDuTempsService {
     private final HeuresManquantesRepository heuresManquantesRepository;
     private final ReservationClient reservationClient;
     private final EnsignatRepository enseignantRepository;
+private final GroupeRepository groupeRepository;
 
     private static final int MAX_ENSEIGNANTS_PAR_SALLE = 2;
     private static final float MOYENNE_ANNUELLE = 15f; // moyenne souhaitée
@@ -167,5 +171,18 @@ public class EmploiDuTempsService {
         } catch (Exception e) {
             throw new RuntimeException("La salle avec ID " + salleId + " n'existe pas.");
         }
+    }
+
+
+
+
+
+    public List<Groupe> getAllGroupes() {
+        return groupeRepository.findAll().stream()
+                .map(groupe -> new Groupe(groupe.getId(), groupe.getNomClasse(),
+                        groupe.getNiveau(), groupe.getOptionGroupe(),
+                        groupe.getEffectif(),
+                        groupe.getDepartement()))
+                .collect(Collectors.toList());
     }
 }
