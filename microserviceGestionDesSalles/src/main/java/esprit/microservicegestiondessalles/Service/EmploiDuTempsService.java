@@ -7,6 +7,7 @@ import esprit.microservicegestiondessalles.Repository.EmploiDuTempsRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,5 +50,25 @@ private final GroupeClient groupeClient;
 
     public List<GroupeDTO> getAllGroupes() {
         return groupeClient.getAllGroupes();
+    }
+
+
+
+    public List<EmploiDuTemps> getEmploisFiltres(Long enseignantId, Long groupeId, String dateStr) {
+        LocalDate date = null;
+        if (dateStr != null && !dateStr.isEmpty()) {
+            date = LocalDate.parse(dateStr);
+        }
+
+        // Variables finales pour la lambda
+        final Long finalEnseignantId = enseignantId;
+        final Long finalGroupeId = groupeId;
+        final LocalDate finalDate = date;
+
+        return emploiDuTempsRepository.findAll().stream()
+                .filter(e -> finalEnseignantId == null || e.getEnseignantId().equals(finalEnseignantId))
+                .filter(e -> finalGroupeId == null || e.getGroupeId().equals(finalGroupeId))
+                .filter(e -> finalDate == null || e.getDate().equals(finalDate))
+                .collect(Collectors.toList());
     }
 }

@@ -41,4 +41,15 @@ public class EmploiDuTempsController {
         return ResponseEntity.ok(emploiDuTempsService.getAllGroupes());
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<EmploiDuTemps>> getEmploisFiltres(
+            @RequestParam(required = false) Long enseignantId,
+            @RequestParam(required = false) Long groupeId,
+            @RequestParam(required = false) String date) {
+
+        List<EmploiDuTemps> emploisFiltres = emploiDuTempsService.getEmploisFiltres(enseignantId, groupeId, date);
+        return ResponseEntity.ok(emploisFiltres);
+    }
+
+
 }
