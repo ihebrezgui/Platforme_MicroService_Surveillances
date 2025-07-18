@@ -1,0 +1,160 @@
+<div class="container">
+  <div class="logo-section">
+    <div class="logo-text">esprit</div>
+    <div class="logo-subtext">Se former autrement</div>
+    <div class="logo-honors">HONORS UNITED UNIVERSITIES</div>
+  </div>
+
+  <div class="left-section">
+    <h1 class="app-title">GestionSurveillance</h1>
+    <p class="app-subtitle">ESPRIT</p>
+  </div>
+
+  <div class="right-section">
+    <div class="auth-section">
+      <h2 class="section-title">Ajouter un Enseignant</h2>
+
+      <form #enseignantForm="ngForm" (ngSubmit)="onSubmit(enseignantForm)" novalidate>
+        <div class="form-grid">
+          <!-- NOM -->
+          <div class="form-group">
+            <input
+              type="text"
+              name="nom"
+              [(ngModel)]="enseignant.nom"
+              #nom="ngModel"
+              class="form-control"
+              placeholder="Nom"
+              required
+            />
+            <div *ngIf="nom.invalid && nom.touched" class="error-msg">Nom requis</div>
+          </div>
+
+          <!-- PRENOM -->
+          <div class="form-group">
+            <input
+              type="text"
+              name="prenom"
+              [(ngModel)]="enseignant.prenom"
+              #prenom="ngModel"
+              class="form-control"
+              placeholder="Prénom"
+              required
+            />
+            <div *ngIf="prenom.invalid && prenom.touched" class="error-msg">Prénom requis</div>
+          </div>
+
+          <!-- EMAIL -->
+          <div class="form-group">
+            <input
+              type="email"
+              name="email"
+              [(ngModel)]="enseignant.email"
+              #email="ngModel"
+              class="form-control"
+              placeholder="Email"
+              required
+              email
+            />
+            <div *ngIf="email.invalid && email.touched" class="error-msg">Email valide requis</div>
+          </div>
+
+          <!-- TELEPHONE -->
+          <div class="form-group">
+            <input
+              type="tel"
+              name="telephone"
+              [(ngModel)]="enseignant.telephone"
+              #telephone="ngModel"
+              class="form-control"
+              placeholder="Téléphone"
+              required
+            />
+            <div *ngIf="telephone.invalid && telephone.touched" class="error-msg">Téléphone requis</div>
+          </div>
+
+         <!-- UNITÉ PÉDAGOGIQUE -->
+          <div class="form-group">
+            
+            <select
+              name="unitePedagogique"
+              [(ngModel)]="selectedUnitePedagogique"
+               class="form-control"
+              required
+            >
+              <option [ngValue]="null" disabled> Unité pédagogique </option>
+              <option *ngFor="let up of unitePedagogiques" [ngValue]="up">
+                Unité : {{ up.libelle }}
+              </option>
+            </select>
+          </div>
+
+          <!-- MODULE FILTRÉ -->
+          <div class="form-group">
+  <select
+    name="myModule"
+    [(ngModel)]="enseignant.moduleId"
+    class="form-control"
+    required
+  >
+    <option [ngValue]="null" disabled selected> Module </option>
+    <option *ngFor="let mod of filteredModules" [value]="mod.id">
+      Module : {{ mod.libelleModule }}
+    </option>
+  </select>
+  <div
+    *ngIf="(enseignant.moduleId === null || enseignant.moduleId === undefined) && enseignantForm.submitted"
+    class="error-msg"
+  >
+    Module requis
+  </div>
+</div>
+
+
+          <!-- MATRICULE -->
+          <div class="form-group">
+            <input
+              type="text"
+              name="matricule"
+              [(ngModel)]="enseignant.matricule"
+              #matricule="ngModel"
+              class="form-control"
+              placeholder="Matricule"
+              required
+              (ngModelChange)="onMatriculeInput($event)"
+            />
+            <div *ngIf="matricule.invalid && matricule.touched" class="error-msg">
+              Matricule requis
+            </div>
+            <div *ngIf="matriculeInvalide && matricule.valid" class="error-msg">
+              Matricule introuvable
+            </div>
+          </div>
+
+          <!-- USER ID (readonly) -->
+          <div class="form-group">
+            <input
+              type="number"
+              name="userId"
+              [(ngModel)]="enseignant.userId"
+              class="form-control"
+              placeholder="User ID (automatique)"
+              readonly
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="enseignantForm.invalid || matriculeInvalide"
+        >
+          Ajouter
+        </button>
+      </form>
+
+      <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    </div>
+  </div>
+</div>

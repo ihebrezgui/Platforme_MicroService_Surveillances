@@ -1,0 +1,104 @@
+<div class="container">
+  <div class="logo-section">
+    <div class="logo-text">esprit</div>
+    <div class="logo-subtext">Se former autrement</div>
+    <div class="logo-honors">HONORS UNITED UNIVERSITIES</div>
+  </div>
+
+  <div class="left-section">
+    <h1 class="app-title">GestionSurveillance</h1>
+    <p class="app-subtitle">ESPRIT</p>
+  </div>
+
+  <div class="right-section">
+    <div class="auth-section">
+      <h2 class="section-title">Ajouter Emploi du Temps</h2>
+
+      <div class="enseignant-info">
+        <h3 class="info-title">Informations de l'enseignant</h3>
+        <div class="info-row">
+          <span class="label">Nom :</span>
+          <span class="value">{{ enseignantNom }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Matricule :</span>
+          <span class="value">{{ enseignantMatricule }}</span>
+        </div>
+      </div>
+
+      <form [formGroup]="emploiForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+
+          <!-- Date -->
+          <div class="form-group">
+            <input type="date" formControlName="date" class="form-control" placeholder="Date" />
+            <div *ngIf="emploiForm.get('date')?.invalid && emploiForm.get('date')?.touched" class="error-msg">
+              Date requise
+            </div>
+          </div>
+
+          <!-- Heure début -->
+          <div class="form-group">
+            <input type="time" formControlName="heureDebut" class="form-control" placeholder="Heure début" />
+            <div *ngIf="emploiForm.get('heureDebut')?.invalid && emploiForm.get('heureDebut')?.touched" class="error-msg">
+              Heure de début requise
+            </div>
+          </div>
+
+          <!-- Heure fin -->
+          <div class="form-group">
+            <input type="time" formControlName="heureFin" class="form-control" placeholder="Heure fin" />
+            <div *ngIf="emploiForm.get('heureFin')?.invalid && emploiForm.get('heureFin')?.touched" class="error-msg">
+              Heure de fin requise
+            </div>
+          </div>
+
+          <!-- Type d'activité -->
+          <div class="form-group">
+            <select formControlName="typeActivite" class="form-control">
+              <option value="">-- Sélectionner un type --</option>
+              <option *ngFor="let type of typeActivites" [value]="type">{{ type }}</option>
+            </select>
+            <div *ngIf="emploiForm.get('typeActivite')?.invalid && emploiForm.get('typeActivite')?.touched" class="error-msg">
+              Type d’activité requis
+            </div>
+          </div>
+
+          <!-- Salle -->
+          <div class="form-group">
+            <select formControlName="salleId" class="form-control">
+              <option value="">-- Sélectionner une salle --</option>
+              <option *ngFor="let salle of salles" [value]="salle.id">{{ salle.nom }}</option>
+            </select>
+            <div *ngIf="emploiForm.get('salleId')?.invalid && emploiForm.get('salleId')?.touched" class="error-msg">
+              Salle requise
+            </div>
+          </div>
+
+          <!-- Groupe -->
+          <div class="form-group">
+            <select formControlName="groupeId" class="form-control">
+              <option value="">-- Sélectionner un groupe --</option>
+              <option *ngFor="let groupe of groupes" [value]="groupe.id">{{ groupe.nomClasse   }}</option>
+            </select>
+            <div *ngIf="emploiForm.get('groupeId')?.invalid && emploiForm.get('groupeId')?.touched" class="error-msg">
+              Groupe requis
+            </div>
+          </div>
+
+          <!-- Enseignant ID (readonly) -->
+          <div class="form-group">
+            <input type="number" class="form-control" [value]="enseignantId" readonly placeholder="Enseignant ID" />
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3" [disabled]="emploiForm.invalid">
+          Enregistrer
+        </button>
+      </form>
+
+      <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    </div>
+  </div>
+</div>

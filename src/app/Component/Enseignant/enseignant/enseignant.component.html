@@ -1,0 +1,30 @@
+<div class="table-wrapper">
+  <h2 class="table-title">Liste des Enseignants</h2>
+
+  <div class="table-responsive">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Module (Unité pédagogique)</th>
+          <th>Matricule</th>
+          
+        </tr>
+      </thead>
+      <tbody>
+  <tr *ngFor="let ens of enseignants">
+    <td>{{ ens.nom }}</td>
+    <td>{{ ens.prenom }}</td>
+    <td>{{ ens.email }}</td>
+    <td>{{ ens.telephone }}</td>
+    <td>{{ ens.moduleLibelle || 'Module non assigné' }} ({{ ens.unitePedagogiqueLibelle || 'Unité non assignée' }})</td>
+    <td>{{ ens.matricule }}</td>
+    
+  </tr>
+</tbody>
+    </table>
+  </div>
+</div>

@@ -1,32 +1,32 @@
 import { Component, OnInit } from '@angular/core';
-import { User } from '../../Entity/User';
-import { UserServiceService } from '../../Service/user-service.service';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { UserServiceService } from '../../Service/user-service.service';
+import { User } from '../../Entity/User';
 
 @Component({
   selector: 'app-user',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './user.component.html',
-  styleUrl: './user.component.scss' 
+  styleUrls: ['./user.component.scss']
 })
-export class UserComponent  {
-email = '';
-  password = '';
-  error = '';
+export class UserComponent  implements OnInit {
+  users: User[] = [];
 
-  constructor(private authService: UserServiceService) {}
+  constructor(private userService: UserServiceService) {}
 
-  onSubmit(): void {
-    this.authService.login({ email: this.email, password: this.password }).subscribe({
-      next: (response) => {
-        console.log('Login success:', response);
-        localStorage.setItem('token', response.token);
-        // redirige l'utilisateur ici si besoin
-      },
-      error: (err) => {
-        console.error('Login failed:', err);
-        this.error = 'Identifiants incorrects';
-      }
+  ngOnInit(): void {
+    this.loadUsers();
+  }
+
+  loadUsers(): void {
+    this.userService.getAllUsers().subscribe({
+      next: (data) => this.users = data,
+      error: (err) => console.error('Erreur lors du chargement des utilisateurs', err)
     });
   }
 }

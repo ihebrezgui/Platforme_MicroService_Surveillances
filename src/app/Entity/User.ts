@@ -1,19 +1,14 @@
 
 
-export interface User {
-  id?: number;         
-  username?: string;
-  email: string;        
-  password?: string;    
-  role?: UserRole;
-  image?: string;
-  matricule?: string;
+
+export class User {
+  username: string = '';
+  email: string = '';
+  password: string = '';
+  role: string = '';
+  matricule: string = '';
+  id!: number; 
+
 
   
-}
-
-  export enum UserRole {
-  ENSEIGNANT = 'ENSEIGNANT',
-  ADMIN = 'ADMIN',
-  SUPER_ADMIN = 'SUPER_ADMIN'
 }
