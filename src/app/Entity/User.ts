@@ -9,6 +9,6 @@ export class User {
   matricule: string = '';
   id!: number; 
 
-
+ active?: boolean;
   
 }

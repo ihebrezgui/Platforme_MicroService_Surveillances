@@ -73,5 +73,14 @@ forgotPassword(email: string): Observable<any> {
   return this.httpClient.get<UserDTO[]>(`${this.baseURL}/enseignants`);
 }
 
+setUserActiveStatus(id: number, active: boolean): Observable<{ message: string }> {
+  return this.httpClient.patch<{ message: string }>(
+    `${this.baseURL}/users/${id}/active?active=${active}`,
+    null // ou {} si nécessaire
+  );
+}
+
+
+
 
 }

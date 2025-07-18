@@ -23,6 +23,29 @@ export class UserComponent  implements OnInit {
     this.loadUsers();
   }
 
+
+toggleUserActive(user: User) {
+  const newStatus = !user.active;
+
+  this.userService.setUserActiveStatus(user.id, newStatus).subscribe({
+    next: (response) => {
+      user.active = newStatus;
+
+      // 💬 Récupère le message dynamique du backend
+      const message = response.message || (newStatus ? 'Utilisateur activé' : 'Utilisateur désactivé');
+
+      // ✅ Affiche le message dans une alerte SweetAlert2
+      Swal.fire('Succès', message, 'success');
+    },
+    error: (error) => {
+      const errorMessage = error.error?.message || 'Erreur lors du changement de statut';
+      Swal.fire('Erreur', errorMessage, 'error');
+    }
+  });
+}
+
+
+
   loadUsers(): void {
     this.userService.getAllUsers().subscribe({
       next: (data) => this.users = data,

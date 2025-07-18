@@ -16,9 +16,10 @@ import { LayoutService } from '../service/layout.service';
           <i class="pi pi-bars"></i>
         </button>
         <a class="layout-topbar-logo" routerLink="/">
-           
+          <img src="assets/layout/images/logo.png" alt="ESPRIT" />
           <span>ESPRIT</span>
         </a>
+
       </div>
 
       <div class="layout-topbar-actions">

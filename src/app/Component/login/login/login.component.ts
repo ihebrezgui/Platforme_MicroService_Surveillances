@@ -5,17 +5,16 @@ import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { UserServiceService } from '../../../Service/user-service.service';
 
-
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-   styleUrls: ['./login.component.scss'], 
+  styleUrls: ['./login.component.scss'], 
 })
 export class LoginComponent {
 
- matricule = '';
+  matricule = '';
   password = '';
   selectedRole = '';
 
@@ -35,12 +34,11 @@ export class LoginComponent {
       return;
     }
 
-   const user = { matricule: this.matricule.trim(), password: this.password };
-
+    const user = { matricule: this.matricule.trim(), password: this.password };
 
     this.authService.login(user).subscribe({
       next: (response: any) => {
-         console.log('Login response:', response);
+        console.log('Login response:', response);
         if (response.role !== this.selectedRole) {
           Swal.fire({
             icon: 'error',
@@ -50,14 +48,14 @@ export class LoginComponent {
           });
           return;
         }
-        // Sauvegarde token etc
+        // Sauvegarde token et infos utilisateur
         localStorage.setItem('token', response.token);
         localStorage.setItem('username', response.username);
         localStorage.setItem('role', response.role);
         localStorage.setItem('matricule', response.matricule);
         localStorage.setItem('email', response.email);
- 
-        // Redirection
+
+        // Redirection selon rôle
         switch (response.role) {
           case 'SUPER_ADMIN':
             this.router.navigate(['/dashboard-superadmin']);
@@ -72,11 +70,24 @@ export class LoginComponent {
             this.router.navigate(['/dashboard']);
         }
       },
-      error: () => {
+      error: (error) => {
+        console.log('Login error:', error);
+
+        let errorMessage = 'Nom d\'utilisateur ou mot de passe incorrect.';
+
+        // Extraction message d'erreur envoyé par backend (string ou objet)
+        if (error.error) {
+          if (typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.error.message) {
+            errorMessage = error.error.message;
+          }
+        }
+
         Swal.fire({
           icon: 'error',
           title: 'Erreur',
-          text: 'Nom d\'utilisateur ou mot de passe incorrect.',
+          text: errorMessage,
           confirmButtonColor: '#dc3545',
         });
       }
