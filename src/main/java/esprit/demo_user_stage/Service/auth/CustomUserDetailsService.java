@@ -1,6 +1,7 @@
 package esprit.demo_user_stage.Service.auth;
 
 import esprit.demo_user_stage.Entity.User;
+import esprit.demo_user_stage.Entity.UserDTO;
 import esprit.demo_user_stage.Repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -8,6 +9,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -111,6 +114,32 @@ public class CustomUserDetailsService implements UserDetailsService {
             return user.getUsername();
         }
         return null;
+    }
+
+    public List<UserDTO> findAllEnseignants() {
+        return userRepository.findByRole("enseignant")
+                .stream()
+                .map(user -> {
+                    UserDTO dto = new UserDTO();
+                    dto.setId(user.getId());
+                    dto.setMatricule(user.getMatricule());
+                    dto.setUsername(user.getUsername()); // ou nom complet si tu as
+                    dto.setRole(user.getRole().name());
+                    dto.setEmail(user.getEmail());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public void setUserActiveStatus(Long userId, boolean active) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if(userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setActive(active);
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("Utilisateur non trouvé");
+        }
     }
 
 }

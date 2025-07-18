@@ -100,18 +100,34 @@ public class AuthController {
 */
 
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> authenticate(@RequestBody Map<String, String> loginRequest) {
+    public ResponseEntity<?> authenticate(@RequestBody Map<String, String> loginRequest) {
         String matricule = loginRequest.get("matricule");
         String password = loginRequest.get("password");
 
         System.out.println("Tentative de connexion pour matricule : " + matricule);
 
+        // Récupérer l'utilisateur avant authentification
+        User user = userService.getUserByMatricule(matricule);
+
+        if (user == null) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Utilisateur non trouvé");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+
+        if (!user.isActive()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Compte désactivé, contactez l'administrateur");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+        }
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(matricule, password));
         } catch (Exception e) {
-            System.out.println("Échec de l'authentification : " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Matricule ou mot de passe incorrect");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
         }
 
         String token = JwtUtils.generateToken(matricule);
@@ -128,7 +144,6 @@ public class AuthController {
         String email = userService.getMailByMatricule(matricule);
         String username = userService.getUsernameByMatricule(matricule);
 
-
         UserDTO userDTO = new UserDTO();
         userDTO.setMatricule(matricule);
         userDTO.setToken(token);
@@ -137,9 +152,9 @@ public class AuthController {
         userDTO.setEmail(email);
         userDTO.setUsername(username);
 
-
         return ResponseEntity.ok(userDTO);
     }
+
 
     @GetMapping("/me")
     public ResponseEntity<UserDetails> getCurrentUser() {
@@ -215,5 +230,26 @@ public class AuthController {
         return userService.getAllUsers();
     }
 
-  
+    @GetMapping("/enseignants")
+    public List<UserDTO> getAllEnseignants() {
+        return userService.findAllEnseignants();
+    }
+
+
+
+    @PatchMapping("/users/{id}/active")
+    public ResponseEntity<Map<String, String>> toggleUserActive(@PathVariable Long id, @RequestParam boolean active) {
+        try {
+            userService.setUserActiveStatus(id, active);
+            String status = active ? "activé" : "désactivé";
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Utilisateur " + status + " avec succès.");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Utilisateur non trouvé.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
+}
 }

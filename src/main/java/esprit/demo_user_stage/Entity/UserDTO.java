@@ -8,9 +8,15 @@ public class UserDTO {
     private String role;
     private String username;
     private String email;
+    private boolean active = true;
 
+    public boolean isActive() {
+        return active;
+    }
 
-
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public String getMatricule() {
         return matricule;

@@ -24,4 +24,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
     private String matricule;
+
+    private boolean active = true;
 }
