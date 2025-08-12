@@ -11,6 +11,7 @@ import esprit.demo_user_stage.Service.auth.PasswordResetTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -53,14 +54,55 @@ public class AuthController {
 
     @ResponseBody
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> registerUser(@RequestBody User user) {
+    public ResponseEntity<UserDTO> registerUser(@RequestBody User user) {
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(savedUser.getId());
+        userDTO.setMatricule(savedUser.getMatricule());
+        userDTO.setUsername(savedUser.getUsername());
+        userDTO.setEmail(savedUser.getEmail());
+        userDTO.setRole(savedUser.getRole().name());
+
+        return ResponseEntity.ok(userDTO);
+    }
+
+
+
+    @PutMapping("/users/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        // Encoder le mot de passe si présent
+        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+            updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        }
+
+        User user = userService.updateUser(id, updatedUser);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé");
+        }
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
+        boolean deleted = userService.deleteUser(id);
         Map<String, String> response = new HashMap<>();
 
-        response.put("message", "user registered successfully");
-        return ResponseEntity.ok(response);
+        if (deleted) {
+            response.put("message", "Utilisateur supprimé avec succès");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "Utilisateur non trouvé");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
+
+
+
 
    /* @PostMapping("/login")
     public ResponseEntity<UserDTO> authenticate(@RequestBody User user) {

@@ -34,6 +34,29 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .build();
     }*/
 
+    public User updateUser(Long id, User updatedUser) {
+        return userRepository.findById(id).map(user -> {
+            user.setUsername(updatedUser.getUsername());
+            user.setMatricule(updatedUser.getMatricule());
+            user.setEmail(updatedUser.getEmail());
+            user.setRole(updatedUser.getRole());
+            if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+                user.setPassword(updatedUser.getPassword()); // ⚠️ N'oublie pas d'encoder dans le controller
+            }
+            return userRepository.save(user);
+        }).orElse(null);
+    }
+    public boolean deleteUser(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+
+
+
     @Override
     public UserDetails loadUserByUsername(String matricule) throws UsernameNotFoundException {
         User user = userRepository.findByMatricule(matricule);
@@ -141,5 +164,8 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new RuntimeException("Utilisateur non trouvé");
         }
     }
+
+
+    //UPDATE + DELETE
 
 }

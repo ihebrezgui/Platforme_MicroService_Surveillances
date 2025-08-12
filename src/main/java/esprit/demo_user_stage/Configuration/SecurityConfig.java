@@ -3,6 +3,7 @@ package esprit.demo_user_stage.Configuration;
 
 import esprit.demo_user_stage.Service.auth.CustomUserDetailsService;
 import esprit.demo_user_stage.Service.auth.JwtAuthenticationFilter;
+import jakarta.ws.rs.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,13 +35,14 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/auth/register", "/auth/login").permitAll()                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/auth/**", "/auth/register", "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/auth/users/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/superadmin/**").hasRole("SUPER_ADMIN")
                         .requestMatchers("/enseignant/**").hasRole("ENSEIGNANT")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-
                         .anyRequest().authenticated()
                 )
+
                 .addFilterBefore(new JwtAuthenticationFilter(userDetailsService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
