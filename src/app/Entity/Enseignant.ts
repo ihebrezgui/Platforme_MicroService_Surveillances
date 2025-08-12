@@ -1,10 +1,14 @@
 import { MyModule } from "./module.model";
+export interface UnitePedagogique {
+  id: number;
+  libelle?: string;
+}
 
 
 export interface Enseignant {
   id?: number;
   nom: string;
-  prenom: string;
+  prenom?: string;
   email: string;
   telephone: string;
   matricule: string;
@@ -13,5 +17,9 @@ export interface Enseignant {
   myModule?: MyModule; // relation au module
   moduleId?: number;
   moduleLibelle?: string;
-  unitePedagogiqueLibelle?: string;  
+
+  grade?: string;
+  unitePedagogique?: UnitePedagogique; 
+  unitePedagogiqueLibelle?: string; // pour l'affichage
 }
+

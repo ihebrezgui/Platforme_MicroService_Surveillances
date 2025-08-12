@@ -1,30 +1,79 @@
 <div class="table-wrapper">
-  <h2 class="table-title">Liste des Enseignants</h2>
+  <h2 class="table-title">
+    📚 Liste des Enseignants
+    
+  </h2>
 
-  <div class="table-responsive">
+  <!-- Loading state -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Chargement des enseignants...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!loading && enseignants.length === 0">
+    <div class="empty-icon">👨‍🏫</div>
+    <h3>Aucun enseignant trouvé</h3>
+    <p>Commencez par ajouter votre premier enseignant.</p>
+    <button class="btn btn-primary" (click)="navigateToAddEnseignant()">
+      Ajouter un enseignant
+    </button>
+  </div>
+
+  <!-- Table content -->
+  <div class="table-responsive" *ngIf="!loading && enseignants.length > 0">
     <table class="styled-table">
       <thead>
         <tr>
-          <th>Nom</th>
-          <th>Prénom</th>
-          <th>Email</th>
-          <th>Téléphone</th>
-          <th>Module (Unité pédagogique)</th>
-          <th>Matricule</th>
-          
+          <th>👤 Nom</th>
+          <th>📧 Email</th>
+          <th>📞 Téléphone</th>
+          <th>🏢 Unité pédagogique</th>
+          <th>🎓 Grade</th>
+          <th>🆔 Matricule</th>
+          <th>⚙️ Actions</th>
         </tr>
       </thead>
       <tbody>
-  <tr *ngFor="let ens of enseignants">
-    <td>{{ ens.nom }}</td>
-    <td>{{ ens.prenom }}</td>
-    <td>{{ ens.email }}</td>
-    <td>{{ ens.telephone }}</td>
-    <td>{{ ens.moduleLibelle || 'Module non assigné' }} ({{ ens.unitePedagogiqueLibelle || 'Unité non assignée' }})</td>
-    <td>{{ ens.matricule }}</td>
-    
-  </tr>
-</tbody>
+        <tr *ngFor="let ens of enseignants">
+          <td data-label="Nom">{{ ens.nom }}</td>
+          <td data-label="Email">{{ ens.email }}</td>
+          <td data-label="Téléphone">{{ ens.telephone }}</td>
+          <td data-label="Unité pédagogique">
+            <span class="unit-badge">
+              {{ getLibelleUnitePedagogique(ens.unitePedagogique?.id) }}
+            </span>
+          </td>
+          <td data-label="Grade">
+            <span class="grade-badge" 
+                  [ngClass]="{
+                    'cup': ens.grade === 'CUP',
+                    'efa': ens.grade === 'EFA', 
+                    'ef': ens.grade === 'EF',
+                    'chef': ens.grade === 'CHEFDEP',
+                    'default': !ens.grade || !['CUP', 'EFA', 'EF', 'CHEFDEP'].includes(ens.grade)
+                  }">
+              <span class="grade-icon">{{ getGradeIcon(ens.grade) }}</span>
+              <span class="grade-text">{{ getGradeLibelle(ens.grade) }}</span>
+            </span>
+          </td>
+          <td data-label="Matricule">{{ ens.matricule }}</td>
+          <td data-label="Actions">
+            <div class="action-buttons">
+              <button class="btn btn-secondary" 
+                      (click)="navigateToUpdateEnseignant(ens.id)"
+                      title="Modifier l'enseignant">
+                Modifier
+              </button>
+              <button class="btn btn-danger" 
+                      (click)="deleteEnseignant(ens.id)"
+                      title="Supprimer l'enseignant">
+                Supprimer
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
 </div>

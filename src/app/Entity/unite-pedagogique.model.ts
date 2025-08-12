@@ -1,7 +1,7 @@
 
 export interface UnitePedagogique {
   id: number;
-  codeUP: string;
+  codeUP?: string;
   libelle: string;
   
 }

@@ -2,6 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { EmploiDuTemps, EmploiDuTempsService, Groupe } from '../../../Service/emploi-du-temps.service';
 import { Enseignant } from '../../../Entity/Enseignant';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+
+interface CalendarCell {
+  heure: string;
+  day: number;
+  emploi?: EmploiDuTemps;
+  estOccupe: boolean;
+}
+
+interface FiltersState {
+  selectedDate: string;
+  selectedEnseignantId: number | null;
+  selectedGroupeId: number | null;
+}
 
 @Component({
   selector: 'app-emploi-temps-filtre',
@@ -9,6 +23,8 @@ import { CommonModule } from '@angular/common';
   templateUrl: './emploi-temps-filtre.component.html',
   styleUrl: './emploi-temps-filtre.component.scss'
 })
+
+
 export class EmploiTempsFiltreComponent implements OnInit {
 
 emploi: EmploiDuTemps[] = [];
@@ -16,14 +32,14 @@ emploi: EmploiDuTemps[] = [];
   enseignants: Enseignant[] = [];
 
   jours: Date[] = [];
-  heures: string[] = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00'];
+  heures: string[] = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00','15:00', '16:00', '17:00', '18:00'];
 
   // Filtrage
   selectedDate!: string;
   selectedEnseignantId: number | null = null;
   selectedGroupeId: number | null = null;
 
-  constructor(private emploiService: EmploiDuTempsService) {}
+  constructor(private emploiService: EmploiDuTempsService, private router:Router) {}
 
   ngOnInit(): void {
     const aujourdhui = new Date();
@@ -136,4 +152,7 @@ emploi: EmploiDuTemps[] = [];
     this.selectedGroupeId = val ? +val : null;
     this.chargerEmploisEtSemaine(this.selectedDate);
   }
+    navigateToAjouterEmploidutemps() {
+  this.router.navigate(['addCalendrier/{{id}}']);
+}
 }

@@ -1,0 +1,312 @@
+<div class="modules-container">
+
+  <!-- Header Section -->
+  <header class="header-section">
+    <h1>📚 Gestion des Modules</h1>
+    <button (click)="openAssignModal()" class="btn-toggle-form" aria-label="Afficher le formulaire d'affectation">
+      <span>➕</span> Affecter Modules
+    </button>
+  </header>
+
+  <!-- Modal Affectation (Ajout) -->
+  <section class="modal" *ngIf="showAssignModal" (click)="closeAssignModal()" role="dialog" aria-modal="true" aria-labelledby="assignModalTitle">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeAssignModal()" aria-label="Fermer">&times;</button>
+
+      <h2 id="assignModalTitle">🎯 Affectation des Modules aux Enseignants</h2>
+
+      <!-- Formulaire affectation -->
+      <div class="form-group">
+        <label for="unite-select-assign">🏫 Sélectionner une unité pédagogique :</label>
+        <select
+          id="unite-select-assign"
+          [ngModel]="selectedUniteId"
+          (ngModelChange)="onUniteChange($event)"
+        >
+          <option [ngValue]="null">-- Choisir une unité pédagogique --</option>
+          <option *ngFor="let up of unites" [ngValue]="up.id">{{ up.libelle }}</option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="selectedUniteId !== null">
+        <label for="enseignant-select-assign">👨‍🏫 Sélectionner un enseignant :</label>
+        <select id="enseignant-select-assign" [(ngModel)]="selectedEnseignantId">
+          <option [ngValue]="null">-- Choisir un enseignant --</option>
+          <option *ngFor="let ens of enseignantsFiltres" [ngValue]="ens.id">{{ ens.nom }}</option>
+        </select>
+      </div>
+
+      <div *ngIf="selectedEnseignantId !== null" class="modules-list">
+        <h3>📚 Modules dans l'unité pédagogique sélectionnée :</h3>
+
+        <div *ngIf="modulesFiltres.length === 0" class="empty-state">
+          <p>Aucun module dans cette unité pédagogique</p>
+        </div>
+
+        <table *ngIf="modulesFiltres.length > 0" class="modules-table">
+          <thead>
+            <tr>
+              <th>📖 Module</th>
+              <th>✅ Sélection</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let mod of modulesFiltres; trackBy: trackByModuleId">
+              <td>{{ mod.libelleModule }}</td>
+              <td>
+                <input
+                  type="checkbox"
+                  [id]="'module-in-up-assign-' + mod.id"
+                  (change)="toggleModuleSelection(mod.id, $any($event.target).checked)"
+                  [checked]="selectedModuleIds.includes(mod.id)"
+                />
+                <label [for]="'module-in-up-assign-' + mod.id" class="sr-only">
+                  Sélectionner {{ mod.libelleModule }}
+                </label>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>📚 Modules hors unité pédagogique :</h3>
+
+        <div *ngIf="modulesHorsUPFiltres.length === 0" class="empty-state">
+          <p>Aucun module hors unité pédagogique</p>
+        </div>
+
+        <table *ngIf="modulesHorsUPFiltres.length > 0" class="modules-table">
+          <thead>
+            <tr>
+              <th>📖 Module</th>
+              <th>✅ Sélection</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let mod of modulesHorsUPFiltres; trackBy: trackByModuleId">
+              <td>{{ mod.libelleModule }}</td>
+              <td>
+                <input
+                  type="checkbox"
+                  [id]="'module-out-up-assign-' + mod.id"
+                  (change)="toggleModuleSelection(mod.id, $any($event.target).checked)"
+                  [checked]="selectedModuleIds.includes(mod.id)"
+                />
+                <label [for]="'module-out-up-assign-' + mod.id" class="sr-only">
+                  Sélectionner {{ mod.libelleModule }}
+                </label>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="selectedModuleIds.length > 0" class="selection-summary" aria-live="polite">
+          <p><strong>{{ selectedModuleIds.length }}</strong> module(s) sélectionné(s)</p>
+        </div>
+      </div>
+
+      <button
+        [disabled]="!selectedEnseignantId || selectedModuleIds.length === 0 || isAssigning"
+        (click)="affecterModules()"
+        class="btn-affect"
+      >
+        <span *ngIf="!isAssigning">🚀 Affecter les Modules Sélectionnés</span>
+        <span *ngIf="isAssigning">⏳ Affectation en cours...</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Modal Edition (Modification) -->
+  <section class="modal" *ngIf="showEditModal" (click)="closeEditModal()" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeEditModal()" aria-label="Fermer">&times;</button>
+
+      <h2 id="editModalTitle">✏️ Modifier les Modules Affectés</h2>
+
+      <div *ngIf="selectedEnseignantId !== null" class="modules-list">
+        <p>Modifiez les modules affectés à l'enseignant :</p>
+
+       <h3>📚 Modules dans l'unité pédagogique :</h3>
+
+<table *ngIf="modulesDansUP.length > 0" class="modules-table">
+  <thead>
+    <tr>
+      <th>📖 Module</th>
+      <th>✅ Sélection</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let mod of modulesDansUP; trackBy: trackByModuleId">
+      <td>{{ mod.libelleModule }}</td>
+      <td>
+        <input
+          type="checkbox"
+          [id]="'module-edit-in-up-' + mod.id"
+          (change)="toggleModuleSelection(mod.id, $any($event.target).checked)"
+          [checked]="selectedModuleIds.includes(mod.id)"
+        />
+        <label [for]="'module-edit-in-up-' + mod.id" class="sr-only">
+          Sélectionner {{ mod.libelleModule }}
+        </label>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>📚 Modules hors unité pédagogique :</h3>
+
+<table *ngIf="modulesHorsUP.length > 0" class="modules-table">
+  <thead>
+    <tr>
+      <th>📖 Module</th>
+      <th>✅ Sélection</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let mod of modulesHorsUP; trackBy: trackByModuleId">
+      <td>{{ mod.libelleModule }}</td>
+      <td>
+        <input
+          type="checkbox"
+          [id]="'module-edit-out-up-' + mod.id"
+          (change)="toggleModuleSelection(mod.id, $any($event.target).checked)"
+          [checked]="selectedModuleIds.includes(mod.id)"
+        />
+        <label [for]="'module-edit-out-up-' + mod.id" class="sr-only">
+          Sélectionner {{ mod.libelleModule }}
+        </label>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+        <div *ngIf="selectedModuleIds.length > 0" class="selection-summary" aria-live="polite">
+          <p><strong>{{ selectedModuleIds.length }}</strong> module(s) sélectionné(s)</p>
+        </div>
+      </div>
+
+      <button
+        [disabled]="selectedModuleIds.length === 0 || isAssigning"
+        (click)="affecterModules()"
+            class="btn-affect"
+      >
+        <span *ngIf="!isAssigning">💾 Mettre à jour</span>
+        <span *ngIf="isAssigning">⏳ Mise à jour en cours...</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Liste des enseignants avec leurs modules -->
+  <section class="teachers-section" aria-live="polite">
+    <h2>👥 Liste des Enseignants avec leurs Modules</h2>
+
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <div *ngIf="!isLoading && enseignantsAvecModules.length === 0" class="empty-state">
+      <div class="empty-icon">👨‍🏫</div>
+      <p>Aucun enseignant avec modules affectés</p>
+    </div>
+
+    <table *ngIf="!isLoading && enseignantsAvecModules.length > 0" class="enseignants-table">
+      <thead>
+        <tr>
+          <th>👨‍🏫 Nom Enseignant</th>
+          <th>📚 Modules Affectés</th>
+          <th>🛠️ Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ens of enseignantsAvecModules; trackBy: trackByEnseignantId">
+          <td>
+            <div class="teacher-name">{{ ens.nom }}</div>
+            <div class="module-count">{{ ens.modules.length || 0 }} module(s)</div>
+          </td>
+          <td>
+            <div *ngIf="!ens.modules || ens.modules.length === 0" class="no-modules"><em>Aucun module affecté</em></div>
+            <ul *ngIf="ens.modules && ens.modules.length > 0">
+              <li *ngFor="let mod of ens.modules; trackBy: trackByModuleLibelle">
+                {{ mod.libelleModule }}
+                <span *ngIf="ens.unitePedagogique && mod.unitePedagogique">
+                  (
+                  <ng-container *ngIf="mod.unitePedagogique.id === ens.unitePedagogique.id; else horsUP">
+                    dans l'UP
+                  </ng-container>
+                  <ng-template #horsUP>
+                    hors UP
+                  </ng-template>
+                  )
+                </span>
+              </li>
+            </ul>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-edit" (click)="openEditModal(ens.id)" title="Modifier les modules">✏️</button>
+              <button class="btn-delete-modules" (click)="openDeleteModulesForm(ens.id)" title="Supprimer des modules">🗑️ Modules</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Modal suppression modules (reste inchangé) -->
+  <section
+    class="modal"
+    *ngIf="showDeleteModulesForm"
+    (click)="closeDeleteModulesForm()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="deleteModulesModalTitle"
+  >
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeDeleteModulesForm()" aria-label="Fermer">&times;</button>
+
+      <h2 id="deleteModulesModalTitle">❌ Supprimer des modules</h2>
+
+      <p>Sélectionnez les modules à supprimer :</p>
+
+      <div *ngIf="enseignantModulesToDelete.length === 0" class="empty-state">
+        <p>Aucun module affecté</p>
+      </div>
+
+      <ul *ngIf="enseignantModulesToDelete.length > 0" class="modules-delete-list">
+        <li *ngFor="let mod of enseignantModulesToDelete">
+          <input
+            type="checkbox"
+            [id]="'del-mod-' + mod.id"
+            (change)="toggleModuleToDelete(mod.id, $any($event.target).checked)"
+          />
+          <label [for]="'del-mod-' + mod.id">{{ mod.libelleModule }}</label>
+        </li>
+      </ul>
+
+      <button
+        [disabled]="selectedModulesToDelete.length === 0 || isLoading"
+        (click)="confirmDeleteSelectedModules()"
+        class="btn-confirm-delete"
+      >
+        <span *ngIf="!isLoading">Supprimer les modules sélectionnés</span>
+        <span *ngIf="isLoading">Suppression en cours...</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Résumé statistiques (inchangé) -->
+  <section *ngIf="!isLoading" class="stats-summary" role="region" aria-label="Statistiques">
+    <div class="stat-card">
+      <div class="stat-number">{{ enseignants.length }}</div>
+      <div class="stat-label">Enseignants</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ modules.length }}</div>
+      <div class="stat-label">Modules</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ getTotalAffectations() }}</div>
+      <div class="stat-label">Affectations</div>
+    </div>
+  </section>
+</div>

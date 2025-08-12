@@ -9,5 +9,5 @@ interface FieldStates {
   password: FieldState;
   role: FieldState;
   resetEmail: FieldState;
-  [key: string]: FieldState; // Add index signature
+  [key: string]: FieldState; 
 }

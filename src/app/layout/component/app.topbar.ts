@@ -15,10 +15,44 @@ import { LayoutService } from '../service/layout.service';
         <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
           <i class="pi pi-bars"></i>
         </button>
-        <a class="layout-topbar-logo" routerLink="/">
-          <img src="assets/layout/images/logo.png" alt="ESPRIT" />
-          <span>ESPRIT</span>
-        </a>
+      <!-- logo.component.html -->
+<a class="layout-topbar-logo" routerLink="/">
+  <img src="assets/img/logo.png" alt="ESPRIT" class="logo-image" />
+
+</a>
+
+<style lang="scss">
+/* logo.component.scss */
+.layout-topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  .logo-image {
+    width: 100px; /* Taille personnalisable */
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  .logo-text {
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+}
+</style>
+
 
       </div>
 

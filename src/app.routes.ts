@@ -20,6 +20,15 @@ import { CalendrierEmploiComponentComponent } from './app/Component/Enseignant/c
 import { CalendrierSurveillanceComponent } from './app/Component/Enseignant/calendrier-surveillance/calendrier-surveillance.component';
 import { AddCalendrierSurveillanceComponent } from './app/Component/Enseignant/add-calendrier-surveillance/add-calendrier-surveillance.component';
 import { EmploiTempsFiltreComponent } from './app/Component/Enseignant/emploi-temps-filtre/emploi-temps-filtre.component';
+import { UpdateUserComponent } from './app/Component/user/update/update-user/update-user.component';
+import { UpdateEnseignantComponent } from './app/Component/Enseignant/update-enseignant/update-enseignant.component';
+import { ModulesComponent } from './app/Component/modules/modules.component';
+import { SessionManagerComponent } from './app/Component/session-manager/session-manager.component';
+import { ModuleManagerComponent } from './app/Component/module-manager/module-manager.component';
+import { GroupeManagerComponent } from './app/Component/groupe-manager/groupe-manager.component';
+import { AffectationComponent } from './app/Component/affectation/affectation.component';
+import { GestionExamenComponent } from './app/Component/gestion-examen/gestion-examen.component';
+import { ExamenChronoComponent } from './app/Component/examen-chrono/examen-chrono.component';
 
 export const appRoutes: Routes = [
     {
@@ -27,23 +36,30 @@ export const appRoutes: Routes = [
     component: AppLayout,
     children: [
         { path: 'users', component: UserComponent },
-         { path: 'enseignants', component: EnseignantComponent },
-         {path: 'addenseignant',component: AddEnseignantComponent},
-         {path: 'addCalendrier/:id',component: AddEmploiDuTempComponent},
-         {path: 'calendrier',component: EmploiDuTempComponent},
-          {path: 'Calendrier_enseignant/:id',component: CalendrierEmploiComponentComponent},
-        
- {path: 'Surveillance',component: CalendrierSurveillanceComponent},
- {path: 'add-surveillance/:id',component: AddCalendrierSurveillanceComponent},
+        { path: 'enseignants', component: EnseignantComponent },
+        {path: 'addenseignant',component: AddEnseignantComponent},
+        {path: 'update-enseignant/:id', component: UpdateEnseignantComponent},
+        {path: 'modules', component: ModulesComponent},
+        {path: 'addCalendrier/:id',component: AddEmploiDuTempComponent},
+        {path: 'calendrier',component: EmploiDuTempComponent},
+        {path: 'Calendrier_enseignant/:id',component: CalendrierEmploiComponentComponent},
+        {path: 'Surveillance',component: CalendrierSurveillanceComponent},
+        {path: 'add-surveillance/:id',component: AddCalendrierSurveillanceComponent},
+        {path:'session',component: SessionManagerComponent},
+        {path:'module_manger',component: ModuleManagerComponent},
+        {path:'groupe_manager',component: GroupeManagerComponent},
+         {path:'AffectationClasse',component:AffectationComponent},
+         {path: 'GestionExamen', component: GestionExamenComponent},    
+           {path: 'examanchreno', component: ExamenChronoComponent}, 
 
 {path: 'calendrier-filtre',component: EmploiTempsFiltreComponent},
 
          
         { path: 'salles', component: SalleComponnentComponent },
-
         { path: 'login', component: LoginComponent , data: { hideLayout: true }},
         { path: '', component: LoginComponent , data: { hideLayout: true }},
          { path: 'register', component: RegisterComponent },
+         {path: 'update-user/:id', component: UpdateUserComponent},
         { path: 'reset-password', component: ResetPasswordComponent, data: { hideLayout: true } },
         { path: 'dashboard-admin', component: DashboardAdminComponent },
         { path: 'dashboard-superadmin', component: DashboardSuperadminComponent },

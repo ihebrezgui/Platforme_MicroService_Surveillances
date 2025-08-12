@@ -1,113 +1,254 @@
-<div class="container">
-  <div class="logo-section">
-    <div class="logo-text">esprit</div>
-    <div class="logo-subtext">Se former autrement</div>
-    <div class="logo-honors">HONORS UNITED UNIVERSITIES</div>
+<div class="registration-container">
+  <div class="floating-elements">
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
   </div>
 
-  <div class="left-section">
-    <h1 class="app-title">GestionSurveillance</h1>
-    <p class="app-subtitle">ESPRIT</p>
+  <div class="header">
+    <h1>✨ Inscription</h1>
+    <p>Créez un nouveau compte utilisateur ou enseignant</p>
   </div>
 
-  <div class="right-section">
-    <div class="auth-section">
-      <h2 class="section-title">Inscription</h2>
-      <form #registerForm="ngForm" (ngSubmit)="onRegister()">
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
 
-        <div class="form-group">
-          <input
-            type="text"
-            name="username"
-            [(ngModel)]="user.username"
-            required
-            minlength="3"
-            #usernameRef="ngModel"
-            class="form-control"
-            placeholder="Nom d'utilisateur"
-          />
-          <div class="error" *ngIf="usernameRef.invalid && usernameRef.touched">
-            <span *ngIf="usernameRef.errors?.['required']">Nom d'utilisateur requis.</span>
-            <span *ngIf="usernameRef.errors?.['minlength']">Minimum 3 caractères requis.</span>
-          </div>
+  <div class="toggle-section">
+    <div class="toggle-option">
+      <input 
+        type="radio" 
+        id="user" 
+        name="formType" 
+        value="user" 
+        [checked]="!isAddingTeacher"
+        (change)="onToggleForm('user')"
+      />
+      <label for="user" class="toggle-label">👤 Ajouter Utilisateur</label>
+    </div>
+    <div class="toggle-option">
+      <input 
+        type="radio" 
+        id="teacher" 
+        name="formType" 
+        value="teacher"
+        [checked]="isAddingTeacher"
+        (change)="onToggleForm('teacher')"
+      />
+      <label for="teacher" class="toggle-label">🎓 Ajouter Enseignant</label>
+    </div>
+    <div class="toggle-slider" [class.teacher]="isAddingTeacher"></div>
+  </div>
+
+  <!-- User Form -->
+  <form 
+    *ngIf="!isAddingTeacher" 
+    [formGroup]="userForm" 
+    (ngSubmit)="onSubmitUser()" 
+    class="form-section"
+    [class.loading]="isSubmittingUser"
+  >
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nom d'utilisateur <span class="required">*</span></label>
+        <input 
+          type="text" 
+          class="form-input" 
+          formControlName="username" 
+          placeholder="Entrez le nom d'utilisateur"
+        />
+        <div class="form-hint">Minimum 3 caractères</div>
+        <div *ngIf="userForm.get('username')?.invalid && userForm.get('username')?.touched" class="form-hint required">
+          Le nom d'utilisateur est requis (min. 3 caractères)
         </div>
-
-        <div class="form-group">
-          <input
-            type="email"
-            name="email"
-            [(ngModel)]="user.email"
-            required
-            email
-            #emailRef="ngModel"
-            class="form-control"
-            placeholder="Adresse e-mail"
-          />
-          <div class="error" *ngIf="emailRef.invalid && emailRef.touched">
-            <span *ngIf="emailRef.errors?.['required']">Adresse e-mail requise.</span>
-            <span *ngIf="emailRef.errors?.['email']">Format d'adresse e-mail invalide.</span>
-          </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Matricule <span class="required">*</span></label>
+        <input 
+          type="text" 
+          class="form-input" 
+          formControlName="matricule" 
+          placeholder="Entrez le matricule"
+        />
+        <div *ngIf="userForm.get('matricule')?.invalid && userForm.get('matricule')?.touched" class="form-hint required">
+          Le matricule est requis (min. 3 caractères)
         </div>
-
-        <div class="form-group">
-          <input
-            type="password"
-            name="password"
-            [(ngModel)]="user.password"
-            required
-            minlength="6"
-            #passwordRef="ngModel"
-            class="form-control"
-            placeholder="Mot de passe"
-          />
-          <div class="error" *ngIf="passwordRef.invalid && passwordRef.touched">
-            <span *ngIf="passwordRef.errors?.['required']">Mot de passe requis.</span>
-            <span *ngIf="passwordRef.errors?.['minlength']">Minimum 6 caractères requis.</span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <select
-            name="role"
-            [(ngModel)]="user.role"
-            required
-            #roleRef="ngModel"
-            class="select-control"
-          >
-            <option value="">Sélectionnez un rôle</option>
-            <option value="SUPER_ADMIN">SUPER_ADMIN</option>
-            <option value="ADMIN">ADMIN</option>
-            <option value="ENSEIGNANT">ENSEIGNANT</option>
-          </select>
-          <div class="error" *ngIf="roleRef.invalid && roleRef.touched">
-            Veuillez sélectionner un rôle.
-          </div>
-        </div>
-
-        <div class="form-group">
-          <input
-            type="text"
-            name="matricule"
-            [(ngModel)]="user.matricule"
-            required
-            minlength="3"
-            #matriculeRef="ngModel"
-            class="form-control"
-            placeholder="Matricule"
-          />
-          <div class="error" *ngIf="matriculeRef.invalid && matriculeRef.touched">
-            <span *ngIf="matriculeRef.errors?.['required']">Matricule requis.</span>
-            <span *ngIf="matriculeRef.errors?.['minlength']">Minimum 3 caractères requis.</span>
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">S'inscrire</button>
-      </form>
-
-      <div class="toggle-section" style="text-align:center; margin-top: 20px;">
-        <span>Déjà un compte ? </span>
-        <a routerLink="/login" class="toggle-link">Se connecter</a>
       </div>
     </div>
-  </div>
+
+    <div class="form-group">
+      <label class="form-label">Adresse e-mail <span class="required">*</span></label>
+      <input 
+        type="email" 
+        class="form-input" 
+        formControlName="email" 
+        placeholder="exemple@domaine.com"
+      />
+      <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="form-hint required">
+        Veuillez entrer une adresse e-mail valide
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Mot de passe <span class="required">*</span></label>
+        <input 
+          type="password" 
+          class="form-input" 
+          formControlName="password" 
+          placeholder="••••••••"
+        />
+        <div class="form-hint">Minimum 6 caractères</div>
+        <div *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" class="form-hint required">
+          Le mot de passe doit contenir au moins 6 caractères
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Rôle <span class="required">*</span></label>
+        <select class="form-select" formControlName="role">
+          <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+          <option value="ADMIN">ADMIN</option>
+          <option value="ENSEIGNANT">ENSEIGNANT</option>
+        </select>
+      </div>
+    </div>
+
+    <button 
+      type="submit" 
+      class="submit-btn" 
+      [disabled]="userForm.invalid || isSubmittingUser"
+    >
+      <span *ngIf="!isSubmittingUser">✨ Créer l'utilisateur</span>
+      <span *ngIf="isSubmittingUser">⏳ Création en cours...</span>
+    </button>
+  </form>
+
+  <!-- Teacher Form (nouveau) -->
+  <form 
+    *ngIf="isAddingTeacher" 
+    [formGroup]="enseignantForm" 
+    (ngSubmit)="onSubmitEnseignant()" 
+    class="form-section"
+    [class.loading]="isSubmittingTeacher"
+  >
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nom d'utilisateur <span class="required">*</span></label>
+        <input 
+          type="text" 
+          class="form-input" 
+          formControlName="username" 
+          placeholder="Entrez le nom d'utilisateur"
+        />
+        <div *ngIf="enseignantForm.get('username')?.invalid && enseignantForm.get('username')?.touched" class="form-hint required">
+          Le nom d'utilisateur est requis (min. 3 caractères)
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Matricule <span class="required">*</span></label>
+        <input 
+          type="text" 
+          class="form-input" 
+          formControlName="matricule" 
+          placeholder="Entrez le matricule"
+        />
+        <div *ngIf="enseignantForm.get('matricule')?.invalid && enseignantForm.get('matricule')?.touched" class="form-hint required">
+          Le matricule est requis (min. 3 caractères)
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Adresse e-mail <span class="required">*</span></label>
+      <input 
+        type="email" 
+        class="form-input" 
+        formControlName="email" 
+        placeholder="exemple@domaine.com"
+      />
+      <div *ngIf="enseignantForm.get('email')?.invalid && enseignantForm.get('email')?.touched" class="form-hint required">
+        Veuillez entrer une adresse e-mail valide
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Mot de passe <span class="required">*</span></label>
+      <input 
+        type="password" 
+        class="form-input" 
+        formControlName="password" 
+        placeholder="••••••••"
+      />
+      <div *ngIf="enseignantForm.get('password')?.invalid && enseignantForm.get('password')?.touched" class="form-hint required">
+        Le mot de passe doit contenir au moins 6 caractères
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Téléphone <span class="required">*</span></label>
+      <input 
+        type="tel" 
+        class="form-input" 
+        formControlName="telephone" 
+        placeholder="+216 XX XXX XXX"
+      />
+      <div *ngIf="enseignantForm.get('telephone')?.invalid && enseignantForm.get('telephone')?.touched" class="form-hint required">
+        Le numéro de téléphone est requis
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Grade <span class="required">*</span></label>
+      <div class="grade-options">
+        <div class="grade-option">
+          <input type="radio" id="cup" formControlName="grade" value="CUP" />
+          <label for="cup">CUP</label>
+        </div>
+        <div class="grade-option">
+          <input type="radio" id="efa" formControlName="grade" value="EFA" />
+          <label for="efa">EFA</label>
+        </div>
+        <div class="grade-option">
+          <input type="radio" id="ef" formControlName="grade" value="EF" />
+          <label for="ef">EF</label>
+        </div>
+        <div class="grade-option">
+          <input type="radio" id="chefdep" formControlName="grade" value="CHEFDEP" />
+          <label for="chefdep">CHEFDEP</label>
+        </div>
+      </div>
+      <div *ngIf="enseignantForm.get('grade')?.invalid && enseignantForm.get('grade')?.touched" class="form-hint required">
+        Veuillez sélectionner un grade
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Unité Pédagogique <span class="required">*</span></label>
+      <select class="form-select" formControlName="unitePedagogiqueId">
+        <option value="">-- Sélectionnez une unité --</option>
+        <option *ngFor="let up of unitePedagogiques" [value]="up.id">{{ up.libelle }}</option>
+      </select>
+      <div *ngIf="enseignantForm.get('unitePedagogiqueId')?.invalid && enseignantForm.get('unitePedagogiqueId')?.touched" class="form-hint required">
+        Veuillez sélectionner une unité pédagogique
+      </div>
+    </div>
+
+    
+
+    <button 
+      type="submit" 
+      class="submit-btn" 
+      [disabled]="enseignantForm.invalid || isSubmittingTeacher"
+    >
+      <span *ngIf="!isSubmittingTeacher">🎓 Créer l'enseignant</span>
+      <span *ngIf="isSubmittingTeacher">⏳ Création en cours...</span>
+    </button>
+  </form>
 </div>

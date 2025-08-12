@@ -99,7 +99,7 @@ export class AppMenu implements OnInit {
         items: [
           ...(role === 'SUPER_ADMIN'
             ? [
-                { label: 'Ajouter User', icon: 'pi pi-fw pi-users', routerLink: ['/register'] },
+              
                 { label: 'Users', icon: 'pi pi-fw pi-id-card', routerLink: ['/users'] },
                 
               ]
@@ -112,20 +112,66 @@ export class AppMenu implements OnInit {
         items: [
           ...(role === 'SUPER_ADMIN'
             ? [
-              { label: 'Ajouter Ensignant', icon: 'pi pi-fw pi-users', routerLink: ['/addenseignant'] },
-              { label: 'Ensignants', icon: 'pi pi-fw pi-id-card', routerLink: ['/enseignants'] },
+    
+              { label: 'Enseignants', icon: 'pi pi-fw pi-id-card', routerLink: ['/enseignants'] },
                 
               ]
             : [])
         ]
     },
     {
-      label: 'Calendrier des Enseignants',
+        label: 'Gestion des modules',
+        items: [
+          ...(role === 'SUPER_ADMIN'
+            ? [
+                { label: ' Modules', icon: 'pi pi-fw pi-id-card', routerLink: ['/module_manger'] },
+                 { label: ' Sessions', icon: 'pi pi-fw pi-id-card', routerLink: ['/session'] },
+                { label: ' Classe/Modules', icon: 'pi pi-fw pi-id-card', routerLink: ['/AffectationClasse'] },
+               
+                { label: ' Enseignant/Module', icon: 'pi pi-fw pi-id-card', routerLink: ['/modules'] },
+                
+              
+              ]
+            : [])
+        ]
+        
+    },
+        {
+        label: 'Gestion des Classes',
         items: [
           ...(role === 'SUPER_ADMIN'
             ? [
               
-                { label: 'Ajouter Emploi du temps', icon: 'pi pi-fw pi-id-card', routerLink: ['/calendrier'] },
+                { label: ' Classes', icon: 'pi pi-fw pi-id-card', routerLink: ['/groupe_manager'] },
+
+
+              ]
+            : [])
+        ]
+        
+    },
+            {
+        label: 'Gestion des Examens',
+        items: [
+          ...(role === 'SUPER_ADMIN'
+            ? [
+              
+                { label: ' Affecation Classes/salles/Enseignants', icon: 'pi pi-fw pi-id-card', routerLink: ['/GestionExamen'] },
+                { label: ' Affecation Chrono', icon: 'pi pi-fw pi-id-card', routerLink: ['/examanchreno'] },
+
+
+              ]
+            : [])
+        ]
+        
+    },
+    {
+      label: 'Calendrier des Enseignants',
+        items: [
+          ...(role === 'SUPER_ADMIN'
+            ? [
+
+          
                 { label: 'Emploi du temps ', icon: 'pi pi-fw pi-id-card', routerLink: ['/calendrier-filtre'] }
                  
               ]
@@ -150,7 +196,20 @@ export class AppMenu implements OnInit {
           ...(role === 'SUPER_ADMIN'
             ? [
               
-                { label: 'Liste des salle', icon: 'pi pi-fw pi-id-card', routerLink: ['/salles'] },
+                { label: 'Salles', icon: 'pi pi-fw pi-id-card', routerLink: ['/salles'] },
+                
+                 
+              ]
+            : [])
+        ]
+    },
+    {
+      label: 'Gestion des Fraudes',
+        items: [
+          ...(role === 'SUPER_ADMIN'
+            ? [
+              
+                { label: 'Fraudes', icon: 'pi pi-fw pi-id-card', routerLink: ['/fraudes'] },
                 
                  
               ]

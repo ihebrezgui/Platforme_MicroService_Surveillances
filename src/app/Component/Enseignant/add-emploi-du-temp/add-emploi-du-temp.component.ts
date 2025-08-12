@@ -1,95 +1,131 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
 
-import { EmploiDuTempsService, EmploiDuTemps, Salle, Groupe } from '../../../Service/emploi-du-temps.service';
-import { SalleService } from '../../../Service/salle-service.service';
+import { EmploiDuTempsService, EmploiDuTemps } from '../../../Service/emploi-du-temps.service';
+import { SalleService, ReservationSalle } from '../../../Service/salle-service.service';
 import { EnseignantService } from '../../../Service/enseignant-service.service';
 import { CommonModule } from '@angular/common';
 
-
 @Component({
   selector: 'app-add-emploi-du-temp',
-    imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './add-emploi-du-temp.component.html',
   styleUrls: ['./add-emploi-du-temp.component.scss']
 })
 export class AddEmploiDuTempComponent implements OnInit {
   emploiForm!: FormGroup;
-  salles: Salle[] = [];
-  groupes: Groupe[] = [];
-  typeActivites: string[] = ['Examen', 'Cours', 'TD', 'TP'];
+  salles: any[] = [];
+  groupes: any[] = [];
+  enseignants: any[] = [];
 
-  enseignantId!: number;
-  enseignantNom: string = '';
-  enseignantMatricule: string = '';
+  selectedEnseignant: any = null;
+  successMessage = '';
+  errorMessage = '';
 
-  successMessage: string = '';
-  errorMessage: string = '';
+  reservationsSalle: ReservationSalle[] = [];
+
+  typeActivites: string[] = ['Examen', 'Cours', 'TD', 'TP', 'Soutenance', 'Surveillance'];
 
   constructor(
     private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
+    private emploiService: EmploiDuTempsService,
     private salleService: SalleService,
     private enseignantService: EnseignantService,
-    private emploiService: EmploiDuTempsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    this.enseignantId = Number(this.route.snapshot.params['id']);
-
     this.emploiForm = this.fb.group({
+      enseignantId: ['', Validators.required],
       date: ['', Validators.required],
       heureDebut: ['', Validators.required],
       heureFin: ['', Validators.required],
-      salleId: ['', Validators.required],
       typeActivite: ['', Validators.required],
+      salle: ['', Validators.required],  // nom de la salle
       groupeId: ['', Validators.required]
     });
 
-    this.salleService.getAllSalles().subscribe(data => (this.salles = data));
-    this.emploiService.getAllGroupes().subscribe(data => (this.groupes = data));
+    this.loadData();
 
-    this.enseignantService.getEnseignantById(this.enseignantId).subscribe(data => {
-      this.enseignantNom = `${data.nom} ${data.prenom}`;
-      this.enseignantMatricule = data.matricule;
-    });
+    // Recharge les réservations quand date ou salle change
+    this.emploiForm.get('date')?.valueChanges.subscribe(() => this.loadReservations());
+    this.emploiForm.get('salle')?.valueChanges.subscribe(() => this.loadReservations());
+  }
+
+  loadData() {
+    this.salleService.getAllSalles().subscribe(data => this.salles = data);
+    this.enseignantService.getAllEnseignants().subscribe(data => this.enseignants = data);
+    this.emploiService.getAllGroupes().subscribe(data => this.groupes = data);
+  }
+
+  onEnseignantSelected(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const id = selectElement.value;
+    this.selectedEnseignant = this.enseignants.find(e => e.id == id) || null;
+    this.emploiForm.patchValue({ enseignantId: id });
+  }
+
+  loadReservations(): void {
+    const salleNom = this.emploiForm.get('salle')?.value;
+    const date = this.emploiForm.get('date')?.value;
+
+    if (salleNom && date) {
+      const salle = this.salles.find(s => s.nom === salleNom);
+      if (salle) {
+        this.salleService.getReservationsParSalleEtDate(salle.id, date).subscribe({
+          next: (reservations) => {
+            this.reservationsSalle = reservations;
+          },
+          error: (err) => {
+            console.error('Erreur chargement réservations', err);
+            this.reservationsSalle = [];
+          }
+        });
+      } else {
+        this.reservationsSalle = [];
+      }
+    } else {
+      this.reservationsSalle = [];
+    }
+  }
+
+  getEnseignantName(id?: number): string {
+    if (!id) return 'Inconnu';
+    const enseignant = this.enseignants.find(e => e.id === id);
+    return enseignant ? enseignant.nom + ' ' + enseignant.prenom : 'Inconnu';
   }
 
   onSubmit(): void {
-    if (this.emploiForm.valid) {
-      const formValue = this.emploiForm.value;
-
-      const selectedSalle = this.salles.find(s => s.id == formValue.salleId);
-      const selectedGroupe = this.groupes.find(g => g.id == formValue.groupeId);
-
-      const newEmploi: EmploiDuTemps = {
-        enseignantId: this.enseignantId,
-        date: formValue.date,
-        heureDebut: formValue.heureDebut,
-        heureFin: formValue.heureFin,
-        typeActivite: formValue.typeActivite,
-        salle: selectedSalle ? selectedSalle.nom : '',
-        groupeId: selectedGroupe ? selectedGroupe.id : 0
-      };
-
-      this.emploiService.create(newEmploi).subscribe({
-        next: () => {
-          this.successMessage = 'Emploi du temps ajouté avec succès.';
-          this.errorMessage = '';
-          this.emploiForm.reset();
-          this.router.navigate(['/Calendrier_enseignant', this.enseignantId]);
-        },
-        error: err => {
-          console.error(err);
-          this.successMessage = '';
-          this.errorMessage = "Erreur lors de l'ajout de l'emploi du temps.";
-        }
-      });
-    } else {
+    if (this.emploiForm.invalid || !this.selectedEnseignant) {
+      this.errorMessage = 'Veuillez remplir tous les champs correctement et sélectionner un enseignant.';
       this.successMessage = '';
-      this.errorMessage = 'Veuillez remplir tous les champs correctement.';
+      return;
     }
+
+    const formValue = this.emploiForm.value;
+
+    const newEmploi: EmploiDuTemps = {
+      id: null,
+      enseignantId: formValue.enseignantId,
+      date: formValue.date,
+      heureDebut: formValue.heureDebut,
+      heureFin: formValue.heureFin,
+      typeActivite: formValue.typeActivite,
+      salle: formValue.salle,
+      groupeId: formValue.groupeId
+    };
+
+    this.emploiService.create(newEmploi).subscribe({
+      next: () => {
+        this.successMessage = 'Emploi du temps ajouté avec succès.';
+        this.errorMessage = '';
+        this.emploiForm.reset();
+        this.selectedEnseignant = null;
+        this.reservationsSalle = [];
+      },
+      error: () => {
+        this.errorMessage = 'Erreur lors de l\'ajout de l\'emploi du temps.';
+        this.successMessage = '';
+      }
+    });
   }
 }

@@ -1,0 +1,98 @@
+<div class="affectation-container">
+  <h2>🧩 Affecter Module à des Groupes</h2>
+
+  <form (ngSubmit)="affecter()" class="form-section" novalidate>
+    <!-- Module -->
+    <div>
+      <label for="moduleSelect">Module</label>
+      <select id="moduleSelect" [(ngModel)]="selectedModuleId" name="module" required>
+              <option value="" disabled selected>-- Choisir un module --</option>
+        <option *ngFor="let module of modules" [value]="module.id">
+          {{ module.libelleModule }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Option Groupe -->
+    <div>
+      <label for="optionSelect">Option</label>
+     <select
+  [(ngModel)]="selectedOptionGroupe"
+  (change)="onOptionGroupeChange($event)"
+  name="optionGroupe"
+  required
+>
+  <option *ngFor="let option of optionsGroupe" [value]="option">{{ option }}</option>
+</select>
+
+    </div>
+
+    <!-- Groupes filtrés par option -->
+    <div class="full-width">
+     <label for="groupesSelect">Groupes (sélection multiple possible)</label>
+<select
+  id="groupesSelect"
+  multiple
+  [(ngModel)]="selectedGroupeIds"
+  name="groupes"
+  required
+  size="6"
+>
+  <option *ngFor="let g of filteredGroupes" [value]="g.id">
+    {{ getDisplayClassName(g) }} — Niveau: {{ g.niveau }} — Effectif: {{ g.effectif }} — Département: {{ g.departement }}
+  </option>
+</select>
+
+    </div>
+
+    <!-- Période -->
+    <div>
+      <label for="periodeSelect">Période</label>
+      <select id="periodeSelect" [(ngModel)]="selectedPeriode" name="periode" required>
+        <option *ngFor="let p of periodes" [value]="p">{{ p }}</option>
+      </select>
+    </div>
+
+    <div></div> <!-- vide pour garder grille alignée -->
+
+    <button type="submit" class="btn-affecter" aria-label="Affecter le module aux groupes">
+      ✅ Affecter
+    </button>
+  </form>
+
+  <hr />
+
+  <h3>📋 Liste des Affectations</h3>
+  <table class="table" aria-label="Liste des affectations">
+    <thead>
+      <tr>
+        <th>Module</th>
+        <th>Groupe</th>
+        <th>Période</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let aff of affectations">
+        <td>{{ aff.module.libelleModule }}</td>
+        <td>
+  {{ getDisplayClassName(aff.groupe) }}
+  <br />
+  <small *ngIf="aff.groupe.niveau">
+    Niveau: {{ aff.groupe.niveau }} |
+    Option: {{ aff.groupe.optionGroupe }} |
+    Effectif: {{ aff.groupe.effectif }} |
+    Département: {{ aff.groupe.departement }}
+  </small>
+</td>
+
+        <td>{{ aff.periode }}</td>
+        <td>
+          <button (click)="deleteAffectation(aff.id)" aria-label="Supprimer l'affectation">
+            ❌ Supprimer
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

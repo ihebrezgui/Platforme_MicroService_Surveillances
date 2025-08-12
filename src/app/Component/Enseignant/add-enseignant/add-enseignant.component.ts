@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 
 import { Enseignant } from '../../../Entity/Enseignant';
@@ -8,6 +8,9 @@ import { UserServiceService } from '../../../Service/user-service.service';
 import { MyModule } from '../../../Entity/module.model';
 import { CommonModule } from '@angular/common';
 import { UnitePedagogique } from '../../../Entity/unite-pedagogique.model';
+import { User } from '../../../Entity/User';
+import { Router } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-add-enseignant',
@@ -17,123 +20,123 @@ import { UnitePedagogique } from '../../../Entity/unite-pedagogique.model';
   styleUrls: ['./add-enseignant.component.scss'],
 })
 export class AddEnseignantComponent implements OnInit {
-  enseignant: Enseignant = {
-    nom: '',
-    prenom: '',
-    email: '',
-    telephone: '',
-    matricule: '',
-    userId: 0,
-    moduleId: null as any,
+  enseignantForm!: FormGroup;
 
-
-
-  };
-
+  users: User[] = [];
   modules: MyModule[] = [];
   unitePedagogiques: UnitePedagogique[] = [];
-  selectedUnitePedagogique: UnitePedagogique | null = null;
-
-  successMessage = '';
-  errorMessage = '';
-  matriculeInvalide = false;
 
   constructor(
+    private fb: FormBuilder,
     private enseignantService: EnseignantService,
-    private userService: UserServiceService
+    private userService: UserServiceService,
+    public router: Router
   ) {}
 
-  ngOnInit() {
-    this.loadUnitePedagogiques();
+  ngOnInit(): void {
     this.loadModules();
-  }
+    this.loadUnitePedagogiques();
+    this.loadEnseignantUsers();
 
-  loadUnitePedagogiques() {
-    this.enseignantService.getAllUnites().subscribe({
-      next: (ups) => {
-        this.unitePedagogiques = ups;
-      },
-      error: (err) => console.error('Erreur chargement unités pédagogiques', err),
+    this.enseignantForm = this.fb.group({
+      userId: ['', Validators.required],
+      matricule: ['', Validators.required],
+      nom: ['', Validators.required],
+      telephone: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      moduleId: ['', Validators.required],
+      unitePedagogiqueId: ['', Validators.required], // Stocke l'id de l'unité sélectionnée
+      grade: ['', Validators.required],
+    });
+
+    // Quand unité pédagogique change, on réinitialise le module
+    this.enseignantForm.get('unitePedagogiqueId')?.valueChanges.subscribe((val) => {
+      console.log('Unité sélectionnée :', val);
+      console.log('Modules filtrés:', this.filteredModules);
+      // Reset moduleId quand unité change
+      this.enseignantForm.patchValue({ moduleId: null });
     });
   }
 
-  loadModules() {
-    this.enseignantService.getAllModules().subscribe({
-      next: (mods) => {
-        this.modules = mods;
-      },
-      error: (err) => console.error('Erreur lors du chargement des modules', err),
+  loadEnseignantUsers(): void {
+    this.userService.getAllUsers().subscribe((users) => {
+      this.users = users.filter((user) => user.role === 'ENSEIGNANT');
+      console.log('Users chargés :', this.users);
     });
   }
 
-  // Getter pour filtrer les modules selon l’unité pédagogique sélectionnée
-  get filteredModules(): MyModule[] {
-    if (!this.selectedUnitePedagogique) return this.modules;
-    return this.modules.filter(
-      (mod) => mod.unitePedagogique?.id === this.selectedUnitePedagogique?.id
-    );
+  loadModules(): void {
+    this.enseignantService.getAllModules().subscribe((modules) => {
+      this.modules = modules;
+      console.log('Modules chargés :', this.modules);
+    });
   }
 
-  onMatriculeInput(matricule: string) {
-    if (!matricule || matricule.trim() === '') {
-      this.matriculeInvalide = false;
-      this.enseignant.userId = 0;
-      return;
+  loadUnitePedagogiques(): void {
+    this.enseignantService.getAllUnites().subscribe((unites) => {
+      this.unitePedagogiques = unites;
+      console.log('Unités pédagogiques chargées :', this.unitePedagogiques);
+    });
+  }
+
+  onUserSelected(userId: any): void {
+    const id = +userId;
+    const selectedUser = this.users.find((user) => user.id === id);
+
+    if (selectedUser) {
+      this.enseignantForm.patchValue({
+        matricule: selectedUser.matricule,
+        nom: selectedUser.username,
+        email: selectedUser.email,
+      });
+
+      this.enseignantForm.get('matricule')?.disable();
+      this.enseignantForm.get('nom')?.disable();
+      this.enseignantForm.get('email')?.disable();
+    } else {
+      this.enseignantForm.get('matricule')?.reset();
+      this.enseignantForm.get('nom')?.reset();
+      this.enseignantForm.get('email')?.reset();
+
+      this.enseignantForm.get('matricule')?.enable();
+      this.enseignantForm.get('nom')?.enable();
+      this.enseignantForm.get('email')?.enable();
     }
-
-    this.userService.getUserByMatricule(matricule).subscribe({
-      next: (user) => {
-        this.enseignant.userId = user.id;
-        this.matriculeInvalide = false;
-      },
-      error: () => {
-        this.enseignant.userId = 0;
-        this.matriculeInvalide = true;
-      },
-    });
   }
 
-  onSubmit(form: NgForm) {
-    if (form.valid && !this.matriculeInvalide) {
-      this.enseignantService.addEnseignant(this.enseignant).subscribe({
+  get filteredModules(): MyModule[] {
+    const selectedUniteId = +this.enseignantForm.get('unitePedagogiqueId')?.value;
+    if (!selectedUniteId) return this.modules;
+    return this.modules.filter((mod) => mod.unitePedagogique?.id === selectedUniteId);
+  }
+
+  onSubmit(): void {
+    if (this.enseignantForm.valid) {
+      const formValue = this.enseignantForm.getRawValue();
+
+      const enseignant: Enseignant = {
+        userId: formValue.userId,
+        matricule: formValue.matricule,
+        nom: formValue.nom,
+        telephone: formValue.telephone,
+        email: formValue.email,
+        moduleId: formValue.moduleId,
+        unitePedagogique: {
+    id: formValue.unitePedagogiqueId,
+  },
+        grade: formValue.grade,
+      };
+
+      this.enseignantService.addEnseignant(enseignant).subscribe({
         next: () => {
-          this.successMessage = 'Enseignant ajouté avec succès';
-          this.errorMessage = '';
-          Swal.fire('Succès', this.successMessage, 'success');
-          form.resetForm();
-          this.resetFormModel();
+          Swal.fire('Succès', "L'enseignant a été ajouté avec succès", 'success');
+          this.router.navigate(['/enseignants']);
         },
         error: (err) => {
-          this.errorMessage = err.error?.message || "Erreur lors de l'ajout";
-          Swal.fire('Erreur', this.errorMessage, 'error');
+          Swal.fire('Erreur', "Erreur lors de l'ajout de l'enseignant", 'error');
+          console.error(err);
         },
       });
-    } else {
-      Swal.fire(
-        'Champs invalides',
-        'Veuillez remplir correctement tous les champs.',
-        'warning'
-      );
     }
   }
-
-  resetFormModel() {
-    this.enseignant = {
-      nom: '',
-      prenom: '',
-      email: '',
-      telephone: '',
-      matricule: '',
-      userId: 0,
-      moduleId: null as any,
-
-  
-    };
-    this.selectedUnitePedagogique = null;
-    this.matriculeInvalide = false;
-    this.successMessage = '';
-    this.errorMessage = '';
-  }
-
-
 }

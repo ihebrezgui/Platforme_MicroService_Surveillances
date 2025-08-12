@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Enseignant } from '../Entity/Enseignant';
 
 export interface EmploiDuTemps {
+  id: any;
  enseignantId: number;
   date: string;
   heureDebut: string;
@@ -36,6 +37,10 @@ export interface Salle {
 export interface Groupe {
   id: number;
   nomClasse: string;
+  niveau: string;
+  optionGroupe: string;
+  effectif: number;
+  departement: string;
 }
 
 
@@ -61,9 +66,11 @@ export class EmploiDuTempsService {
     return this.http.get<Enseignant[]>(`${this.baseUrl}/getAllEnseignants`);
   }
 
+
+  //add emploi du temps
   create(emploi: EmploiDuTemps): Observable<EmploiDuTemps> {
   return this.http.post<EmploiDuTemps>(`${this.Url}/create`, emploi);
-}
+  }
 
 
  getByEnseignant(id: number): Observable<EmploiDuTemps[]> {
@@ -97,5 +104,12 @@ export class EmploiDuTempsService {
 
   return this.http.get<EmploiDuTemps[]>(`${this.Url}/filter`, { params });
 }
+getEmploisParSalle(salleNom: string): Observable<EmploiDuTemps[]> {
+  return this.http.get<EmploiDuTemps[]>(`${this.Url}/salle/${salleNom}`);
+}
+
+
+
+
 
 }

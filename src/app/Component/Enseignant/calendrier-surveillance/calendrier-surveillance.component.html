@@ -7,7 +7,7 @@
         <tr>
           <th>Matricule</th>
           <th>Nom</th>
-          <th>Prénom</th>
+        
           <th>Action</th>
         </tr>
       </thead>
@@ -15,7 +15,7 @@
         <tr *ngFor="let enseignant of enseignants">
           <td>{{ enseignant.matricule }}</td>
           <td>{{ enseignant.nom }}</td>
-          <td>{{ enseignant.prenom }}</td>
+          
           <td>
             <button class="btn-action"*ngIf="enseignant.id !== undefined" (click)="ajouterEmploi(enseignant.id)">
               + Emploi du surveillance
