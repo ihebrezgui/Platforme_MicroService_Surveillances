@@ -206,7 +206,7 @@ export class AppMenu implements OnInit {
     {
       label: 'Gestion des Fraudes',
         items: [
-          ...(role === 'SUPER_ADMIN'
+          ...(role === 'ENSEIGNANT'
             ? [
               
                 { label: 'Fraudes', icon: 'pi pi-fw pi-id-card', routerLink: ['/fraudes'] },
@@ -216,6 +216,7 @@ export class AppMenu implements OnInit {
             : [])
         ]
     }
+    
     ];
   }
 }

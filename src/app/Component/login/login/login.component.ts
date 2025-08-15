@@ -50,6 +50,7 @@ export class LoginComponent {
         }
         // Sauvegarde token et infos utilisateur
         localStorage.setItem('token', response.token);
+        localStorage.setItem('id', response.id.toString());
         localStorage.setItem('username', response.username);
         localStorage.setItem('role', response.role);
         localStorage.setItem('matricule', response.matricule);

@@ -29,6 +29,7 @@ import { GroupeManagerComponent } from './app/Component/groupe-manager/groupe-ma
 import { AffectationComponent } from './app/Component/affectation/affectation.component';
 import { GestionExamenComponent } from './app/Component/gestion-examen/gestion-examen.component';
 import { ExamenChronoComponent } from './app/Component/examen-chrono/examen-chrono.component';
+import { FraudeComponent } from './app/Component/fraude/fraude.component';
 
 export const appRoutes: Routes = [
     {
@@ -50,9 +51,10 @@ export const appRoutes: Routes = [
         {path:'groupe_manager',component: GroupeManagerComponent},
          {path:'AffectationClasse',component:AffectationComponent},
          {path: 'GestionExamen', component: GestionExamenComponent},    
-           {path: 'examanchreno', component: ExamenChronoComponent}, 
+        {path: 'examanchreno', component: ExamenChronoComponent}, 
 
-{path: 'calendrier-filtre',component: EmploiTempsFiltreComponent},
+        { path: 'fraudes', component: FraudeComponent },
+        {path: 'calendrier-filtre',component: EmploiTempsFiltreComponent},
 
          
         { path: 'salles', component: SalleComponnentComponent },
