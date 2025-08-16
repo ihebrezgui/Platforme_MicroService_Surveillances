@@ -65,7 +65,8 @@
       <tr>
         <th>Nom Étudiant</th>
         <th>Matricule</th>
-        <th>Groupe</th>
+        <th>Classe</th>
+        <th>Num Groupe</th>
         <th>Type</th>
         <th>Description</th>
         <th>Statut</th>
@@ -76,7 +77,8 @@
       <tr *ngFor="let f of fraudes">
         <td>{{ f.nomEtudiant }}</td>
         <td>{{ f.matriculeEnseignant }}</td>
-        <td>{{ f.groupeId }} - {{ f.nomGroupe }}</td>
+        <td>{{ f.nomGroupe }}  </td>
+        <td>{{ f.groupeId }}</td>
         <td>{{ f.type }}</td>
         <td>{{ f.description }}</td>
         <td>{{ f.statut }}</td>

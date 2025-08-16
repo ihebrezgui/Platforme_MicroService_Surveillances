@@ -1,3 +1,4 @@
+import { NotificationService } from './../../Service/notification.service';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -36,6 +37,8 @@ interface EventsWithVisibility {
 @Component({
   selector: 'app-examen-chrono',
   imports: [CommonModule, ReactiveFormsModule],
+
+   standalone: true,
   templateUrl: './examen-chrono.component.html',
   styleUrls: ['./examen-chrono.component.scss']
 })
@@ -77,7 +80,10 @@ export class ExamenChronoComponent implements OnInit {
     private affectationService: AffectationService,
     private salleService: SalleService,
     private sessionService: SessionServiceService,
-    private enseignantService: EnseignantService
+    private enseignantService: EnseignantService,
+    private NotificationService : NotificationService,
+
+
   ) {
     this.examenForm = this.fb.group({
       sessionId: ['', Validators.required],
@@ -93,6 +99,7 @@ export class ExamenChronoComponent implements OnInit {
     this.loadSessions();
     this.loadEnseignants();
     this.loadInitialData();
+    this.NotificationService.connect();
 
     this.examenForm.get('periode')?.valueChanges.subscribe(periode => {
       this.loadModulesByPeriode(periode);

@@ -206,14 +206,14 @@ export class AppMenu implements OnInit {
     {
       label: 'Gestion des Fraudes',
         items: [
-          ...(role === 'ENSEIGNANT'
-            ? [
+          ...(
+             [
               
                 { label: 'Fraudes', icon: 'pi pi-fw pi-id-card', routerLink: ['/fraudes'] },
                 
                  
               ]
-            : [])
+            )
         ]
     }
     
