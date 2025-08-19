@@ -3,9 +3,13 @@
   <!-- Header Section -->
   <header class="header-section">
     <h1>📚 Gestion des Modules</h1>
-    <button (click)="openAssignModal()" class="btn-toggle-form" aria-label="Afficher le formulaire d'affectation">
-      <span>➕</span> Affecter Modules
-    </button>
+   <button *ngIf="roleUtilisateur === 'SUPER_ADMIN' || roleUtilisateur === 'ADMIN'" 
+        (click)="openAssignModal()" 
+        class="btn-toggle-form" 
+        aria-label="Afficher le formulaire d'affectation">
+  <span>➕</span> Affecter Modules
+</button>
+
   </header>
 
   <!-- Modal Affectation (Ajout) -->
@@ -214,11 +218,13 @@
         <tr>
           <th>👨‍🏫 Nom Enseignant</th>
           <th>📚 Modules Affectés</th>
-          <th>🛠️ Actions</th>
+          <th *ngIf="roleUtilisateur === 'SUPER_ADMIN' || roleUtilisateur === 'ADMIN'">🛠️ Actions</th>
+
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let ens of enseignantsAvecModules; trackBy: trackByEnseignantId">
+        <tr *ngFor="let ens of enseignantsAffiches; trackBy: trackByEnseignantId">
+
           <td>
             <div class="teacher-name">{{ ens.nom }}</div>
             <div class="module-count">{{ ens.modules.length || 0 }} module(s)</div>
@@ -241,12 +247,13 @@
               </li>
             </ul>
           </td>
-          <td>
-            <div class="action-buttons">
-              <button class="btn-edit" (click)="openEditModal(ens.id)" title="Modifier les modules">✏️</button>
-              <button class="btn-delete-modules" (click)="openDeleteModulesForm(ens.id)" title="Supprimer des modules">🗑️ Modules</button>
-            </div>
-          </td>
+         <td *ngIf="roleUtilisateur === 'SUPER_ADMIN' || roleUtilisateur === 'ADMIN'">
+  <div class="action-buttons">
+    <button class="btn-edit" (click)="openEditModal(ens.id)" title="Modifier les modules">✏️</button>
+    <button class="btn-delete-modules" (click)="openDeleteModulesForm(ens.id)" title="Supprimer des modules">🗑️ Modules</button>
+  </div>
+</td>
+
         </tr>
       </tbody>
     </table>
@@ -294,19 +301,20 @@
     </div>
   </section>
 
-  <!-- Résumé statistiques (inchangé) -->
-  <section *ngIf="!isLoading" class="stats-summary" role="region" aria-label="Statistiques">
-    <div class="stat-card">
-      <div class="stat-number">{{ enseignants.length }}</div>
-      <div class="stat-label">Enseignants</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">{{ modules.length }}</div>
-      <div class="stat-label">Modules</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">{{ getTotalAffectations() }}</div>
-      <div class="stat-label">Affectations</div>
-    </div>
-  </section>
-</div>
+ <!-- Résumé statistiques (visible seulement pour SUPER_ADMIN et ADMIN) -->
+<section *ngIf="!isLoading && (roleUtilisateur === 'SUPER_ADMIN' || roleUtilisateur === 'ADMIN')" 
+         class="stats-summary" role="region" aria-label="Statistiques">
+  <div class="stat-card">
+    <div class="stat-number">{{ enseignants.length }}</div>
+    <div class="stat-label">Enseignants</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">{{ modules.length }}</div>
+    <div class="stat-label">Modules</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">{{ getTotalAffectations() }}</div>
+    <div class="stat-label">Affectations</div>
+  </div>
+</section>
+

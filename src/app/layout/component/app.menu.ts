@@ -38,7 +38,6 @@ import { AppMenuitem } from './app.menuitem';
       opacity: 0.4;
     }
 
-    /* Style des labels principaux */
     .layout-menu > li > a,
     .layout-menu > li > div {
       display: flex;
@@ -46,21 +45,19 @@ import { AppMenuitem } from './app.menuitem';
       padding: 0.75rem 1.25rem;
       font-weight: 600;
       font-size: 1rem;
-      color: #dc3545; /* couleur ESPRIT */
+      color: #dc3545;
       cursor: pointer;
       transition: background-color 0.3s ease;
       border-radius: 6px;
       user-select: none;
     }
 
-    /* Survol des items */
     .layout-menu > li > a:hover,
     .layout-menu > li > div:hover {
-      background-color: #f8d7da; /* rose clair */
-      color: #a71d2a; /* rouge foncé */
+      background-color: #f8d7da;
+      color: #a71d2a;
     }
 
-    /* Icônes PrimeNG */
     .layout-menu .pi {
       margin-right: 0.75rem;
       font-size: 1.2rem;
@@ -94,129 +91,82 @@ export class AppMenu implements OnInit {
           { label: dashboardLabel, icon: 'pi pi-fw pi-home', routerLink: [dashboardLink] }
         ]
       },
-      {
+
+      
+
+      ...(role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'ENSEIGNANT' ? [{
         label: 'Gestion des Users',
         items: [
-          ...(role === 'SUPER_ADMIN'
-            ? [
-              
-                { label: 'Users', icon: 'pi pi-fw pi-id-card', routerLink: ['/users'] },
-                
-              ]
-            : [])
+          { label: 'Users', icon: 'pi pi-fw pi-id-card', routerLink: ['/users'] }
         ]
-        
-      },
-      {
-      label: 'Gestion des Enseignants',
+      }] : []),
+
+
+
+      ...(role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'ENSEIGNANT' ?[{
+        label: 'Gestion des Enseignants',
         items: [
-          ...(role === 'SUPER_ADMIN'
-            ? [
-    
-              { label: 'Enseignants', icon: 'pi pi-fw pi-id-card', routerLink: ['/enseignants'] },
-                
-              ]
-            : [])
+          { label: 'Enseignants', icon: 'pi pi-fw pi-id-card', routerLink: ['/enseignants'] }
         ]
-    },
-    {
-        label: 'Gestion des modules',
-        items: [
-          ...(role === 'SUPER_ADMIN'
-            ? [
-                { label: ' Modules', icon: 'pi pi-fw pi-id-card', routerLink: ['/module_manger'] },
-                 { label: ' Sessions', icon: 'pi pi-fw pi-id-card', routerLink: ['/session'] },
-                { label: ' Classe/Modules', icon: 'pi pi-fw pi-id-card', routerLink: ['/AffectationClasse'] },
-               
-                { label: ' Enseignant/Module', icon: 'pi pi-fw pi-id-card', routerLink: ['/modules'] },
-                
-              
+      }] : []),
+
+      ...(role === 'SUPER_ADMIN' || role === 'ADMIN' ? [{
+          label: 'Gestion des modules',
+          items: [
+            { label: 'Modules', icon: 'pi pi-fw pi-id-card', routerLink: ['/module_manger'] },
+            { label: 'Sessions', icon: 'pi pi-fw pi-id-card', routerLink: ['/session'] },
+            { label: 'Classe/Modules', icon: 'pi pi-fw pi-id-card', routerLink: ['/AffectationClasse'] },
+            { label: 'Enseignant/Module', icon: 'pi pi-fw pi-id-card', routerLink: ['/modules'] }
+          ]
+            }] : role === 'ENSEIGNANT' ? [{
+              label: 'Gestion des modules',
+              items: [
+                { label: 'Enseignant/Module', icon: 'pi pi-fw pi-id-card', routerLink: ['/modules'] }
               ]
-            : [])
-        ]
-        
-    },
-        {
+            }] : []),
+
+      ...(role === 'SUPER_ADMIN' || role === 'ADMIN'  ? [{
         label: 'Gestion des Classes',
         items: [
-          ...(role === 'SUPER_ADMIN'
-            ? [
-              
-                { label: ' Classes', icon: 'pi pi-fw pi-id-card', routerLink: ['/groupe_manager'] },
-
-
-              ]
-            : [])
+          { label: 'Classes', icon: 'pi pi-fw pi-id-card', routerLink: ['/groupe_manager'] }
         ]
-        
-    },
-            {
+      }] : []),
+
+      ...(role === 'SUPER_ADMIN' || role === 'ADMIN' ? [{
         label: 'Gestion des Examens',
         items: [
-          ...(role === 'SUPER_ADMIN'
-            ? [
-              
-                { label: ' Affecation Classes/salles/Enseignants', icon: 'pi pi-fw pi-id-card', routerLink: ['/GestionExamen'] },
-                { label: ' Affecation Chrono', icon: 'pi pi-fw pi-id-card', routerLink: ['/examanchreno'] },
+          { label: 'Affectation Classes/salles/Enseignants', icon: 'pi pi-fw pi-id-card', routerLink: ['/GestionExamen'] },
+          { label: 'Affectation Chrono', icon: 'pi pi-fw pi-id-card', routerLink: ['/examanchreno'] }
+        ]
+      }] : []),
 
+      ...(role === 'SUPER_ADMIN' || role === 'ADMIN' ? [{
+        label: 'Calendrier des Enseignants',
+        items: [
+          { label: 'Emploi du temps', icon: 'pi pi-fw pi-id-card', routerLink: ['/calendrier-filtre'] }
+        ]
+      }] : []),
 
-              ]
-            : [])
-        ]
-        
-    },
-    {
-      label: 'Calendrier des Enseignants',
+      ...(role === 'SUPER_ADMIN' || role === 'ADMIN' ? [{
+        label: 'Calendrier des Surveillances',
         items: [
-          ...(role === 'SUPER_ADMIN'
-            ? [
+          { label: 'Emploi du surveillance', icon: 'pi pi-fw pi-id-card', routerLink: ['/Surveillance'] }
+        ]
+      }] : []),
 
-          
-                { label: 'Emploi du temps ', icon: 'pi pi-fw pi-id-card', routerLink: ['/calendrier-filtre'] }
-                 
-              ]
-            : [])
-        ]
-    },
-    {
-      label: 'Calendrier des Surveillances',
+      ...(role === 'SUPER_ADMIN' || role === 'ADMIN' ? [{
+        label: 'Gestion des salles',
         items: [
-          ...(role === 'SUPER_ADMIN'
-            ? [
-              
-                { label: 'Emploi du surveillance', icon: 'pi pi-fw pi-id-card', routerLink: ['/Surveillance'] }
-                 
-              ]
-            : [])
+          { label: 'Salles', icon: 'pi pi-fw pi-id-card', routerLink: ['/salles'] }
         ]
-    },
-    {
-      label: 'Gestion des salles',
+      }] : []),
+
+      {
+        label: 'Gestion des Fraudes',
         items: [
-          ...(role === 'SUPER_ADMIN'
-            ? [
-              
-                { label: 'Salles', icon: 'pi pi-fw pi-id-card', routerLink: ['/salles'] },
-                
-                 
-              ]
-            : [])
+          { label: 'Fraudes', icon: 'pi pi-fw pi-id-card', routerLink: ['/fraudes'] }
         ]
-    },
-    {
-      label: 'Gestion des Fraudes',
-        items: [
-          ...(
-             [
-              
-                { label: 'Fraudes', icon: 'pi pi-fw pi-id-card', routerLink: ['/fraudes'] },
-                
-                 
-              ]
-            )
-        ]
-    }
-    
+      }
     ];
   }
 }

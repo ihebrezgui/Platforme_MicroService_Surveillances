@@ -1,42 +1,52 @@
 import { Injectable } from '@angular/core';
 import { Client, Message } from '@stomp/stompjs';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
   private stompClient!: Client;
-
-  connect() {
+   private messagesSubject = new Subject<any>();
+  public messages$ = this.messagesSubject.asObservable();
+  connect(enseignantId: number) {
     this.stompClient = new Client({
-      brokerURL: 'http://localhost:8090/ws-support', // WebSocket natif
+      brokerURL: 'ws://localhost:8090/ws',
       reconnectDelay: 5000,
     });
 
     this.stompClient.onConnect = () => {
-      console.log('Connected to WebSocket');
+      console.log('✅ Connected to WebSocket');
 
-      this.stompClient.subscribe('/topic/notifications', (message: Message) => {
-        console.log('Notification received:', message.body);
+      // abonnement spécifique
+      this.stompClient.subscribe(`/topic/notifications/52`, (message: Message) => {
+        console.log('🔔 Notification received:', message.body);
+
+        // 👉 afficher une notification type "prompt" pendant 10s
+        alert(message.body); // simple exemple
+        setTimeout(() => {
+          console.log('⏱️ Notification auto-close after 10s');
+        }, 10000);
       });
     };
 
     this.stompClient.activate();
   }
 
-  sendNotification(message: string) {
+  sendNotificationToTeacher(enseignantId: number, message: string) {
     if (this.stompClient.connected) {
-      this.stompClient.publish({ destination: '/app/send-notification', body: message });
-      console.log('Notification sent:', message);
-    } else {
-      console.warn('WebSocket not connected');
+      this.stompClient.publish({
+        destination: `/app/send-notification/${enseignantId}`,
+        body: message,
+      });
+      console.log(`Notification sent to enseignant ${enseignantId}:`, message);
     }
   }
 
   disconnect() {
     if (this.stompClient.active) {
       this.stompClient.deactivate();
-      console.log('Disconnected from WebSocket');
+      console.log('❌ Disconnected from WebSocket');
     }
   }
 }

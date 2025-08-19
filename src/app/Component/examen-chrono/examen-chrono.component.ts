@@ -99,7 +99,15 @@ export class ExamenChronoComponent implements OnInit {
     this.loadSessions();
     this.loadEnseignants();
     this.loadInitialData();
-    this.NotificationService.connect();
+    const enseignantId = 52;
+    this.NotificationService.connect(enseignantId);
+
+    this.NotificationService.messages$.subscribe({
+  next: (notif) => {
+    console.log('Notification reçue pour l’enseignant 52:', notif);
+  },
+  error: err => console.error('Erreur lors de la réception de notification:', err)
+});
 
     this.examenForm.get('periode')?.valueChanges.subscribe(periode => {
       this.loadModulesByPeriode(periode);

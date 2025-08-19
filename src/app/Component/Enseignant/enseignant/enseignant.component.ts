@@ -10,12 +10,13 @@ import { UnitePedagogique } from '../../../Entity/unite-pedagogique.model';
   selector: 'app-enseignant',
   templateUrl: './enseignant.component.html',
   styleUrls: ['./enseignant.component.scss'],
-  imports: [CommonModule], 
+  imports: [CommonModule],
 })
 export class EnseignantComponent implements OnInit {
   enseignants: Enseignant[] = [];
   unitePedagogiques: UnitePedagogique[] = [];
   loading: boolean = true;
+  role: string = ''; // récupérer depuis le token/session
 
   constructor(
     private enseignantService: EnseignantService,
@@ -23,6 +24,8 @@ export class EnseignantComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Récupération du rôle depuis localStorage ou service
+    this.role = localStorage.getItem('role') || '';
     this.loadData();
   }
 
@@ -33,6 +36,11 @@ export class EnseignantComponent implements OnInit {
         this.loadUnitePedagogiques(),
         this.loadEnseignants()
       ]);
+      // filtrer les enseignants si ENSEIGNANT
+      if (this.role === 'ENSEIGNANT') {
+        const currentMatricule = localStorage.getItem('matricule') || '';
+        this.enseignants = this.enseignants.filter(e => e.matricule === currentMatricule);
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
     } finally {
@@ -97,15 +105,19 @@ export class EnseignantComponent implements OnInit {
   }
 
   navigateToAddEnseignant(): void {
+    if (this.role !== 'SUPER_ADMIN') return; // seul SUPER_ADMIN peut ajouter
     this.router.navigate(['/addenseignant']);
   }
 
   navigateToUpdateEnseignant(id?: number): void {
-    if (id) this.router.navigate(['/update-enseignant', id]);
+    if (!id) return;
+    if (this.role === 'ENSEIGNANT') return; // enseignant ne peut modifier
+    this.router.navigate(['/update-enseignant', id]);
   }
 
   deleteEnseignant(id?: number): void {
     if (!id) return;
+    if (this.role !== 'SUPER_ADMIN') return; // seul SUPER_ADMIN peut supprimer
     
     Swal.fire({
       title: 'Êtes-vous sûr ?',
@@ -139,5 +151,17 @@ export class EnseignantComponent implements OnInit {
         });
       }
     });
+  }
+
+  canEdit(): boolean {
+    return this.role === 'SUPER_ADMIN' || this.role === 'ADMIN';
+  }
+
+  canDelete(): boolean {
+    return this.role === 'SUPER_ADMIN';
+  }
+
+  canAdd(): boolean {
+    return this.role === 'SUPER_ADMIN';
   }
 }

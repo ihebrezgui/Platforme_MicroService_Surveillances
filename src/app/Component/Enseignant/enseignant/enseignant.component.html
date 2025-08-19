@@ -1,8 +1,10 @@
 <div class="table-wrapper">
-  <h2 class="table-title">
-    📚 Liste des Enseignants
-    
-  </h2>
+  <h2 class="table-title">📚 Liste des Enseignants</h2>
+
+  <!-- Bouton Ajouter uniquement pour SUPER_ADMIN -->
+  <div *ngIf="canAdd()" class="mb-3">
+   
+  </div>
 
   <!-- Loading state -->
   <div class="loading-state" *ngIf="loading">
@@ -15,7 +17,7 @@
     <div class="empty-icon">👨‍🏫</div>
     <h3>Aucun enseignant trouvé</h3>
     <p>Commencez par ajouter votre premier enseignant.</p>
-    <button class="btn btn-primary" (click)="navigateToAddEnseignant()">
+    <button *ngIf="canAdd()" class="btn btn-primary" (click)="navigateToAddEnseignant()">
       Ajouter un enseignant
     </button>
   </div>
@@ -31,7 +33,8 @@
           <th>🏢 Unité pédagogique</th>
           <th>🎓 Grade</th>
           <th>🆔 Matricule</th>
-          <th>⚙️ Actions</th>
+          <!-- Actions uniquement pour SUPER_ADMIN et ADMIN -->
+          <th *ngIf="role !== 'ENSEIGNANT'">⚙️ Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -39,35 +42,20 @@
           <td data-label="Nom">{{ ens.nom }}</td>
           <td data-label="Email">{{ ens.email }}</td>
           <td data-label="Téléphone">{{ ens.telephone }}</td>
-          <td data-label="Unité pédagogique">
-            <span class="unit-badge">
-              {{ getLibelleUnitePedagogique(ens.unitePedagogique?.id) }}
-            </span>
-          </td>
-          <td data-label="Grade">
-            <span class="grade-badge" 
-                  [ngClass]="{
-                    'cup': ens.grade === 'CUP',
-                    'efa': ens.grade === 'EFA', 
-                    'ef': ens.grade === 'EF',
-                    'chef': ens.grade === 'CHEFDEP',
-                    'default': !ens.grade || !['CUP', 'EFA', 'EF', 'CHEFDEP'].includes(ens.grade)
-                  }">
-              <span class="grade-icon">{{ getGradeIcon(ens.grade) }}</span>
-              <span class="grade-text">{{ getGradeLibelle(ens.grade) }}</span>
-            </span>
-          </td>
+          <td data-label="Unité pédagogique">{{ getLibelleUnitePedagogique(ens.unitePedagogique?.id) }}</td>
+          <td data-label="Grade">{{ getGradeIcon(ens.grade) }} {{ getGradeLibelle(ens.grade) }}</td>
           <td data-label="Matricule">{{ ens.matricule }}</td>
-          <td data-label="Actions">
+          <!-- Actions -->
+          <td *ngIf="role !== 'ENSEIGNANT'">
             <div class="action-buttons">
-              <button class="btn btn-secondary" 
-                      (click)="navigateToUpdateEnseignant(ens.id)"
-                      title="Modifier l'enseignant">
+              <!-- Modifier pour SUPER_ADMIN et ADMIN -->
+              <button *ngIf="canEdit()" class="btn btn-secondary" 
+                      (click)="navigateToUpdateEnseignant(ens.id)">
                 Modifier
               </button>
-              <button class="btn btn-danger" 
-                      (click)="deleteEnseignant(ens.id)"
-                      title="Supprimer l'enseignant">
+              <!-- Supprimer uniquement pour SUPER_ADMIN -->
+              <button *ngIf="canDelete()" class="btn btn-danger" 
+                      (click)="deleteEnseignant(ens.id)">
                 Supprimer
               </button>
             </div>

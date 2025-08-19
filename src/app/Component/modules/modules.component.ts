@@ -30,6 +30,8 @@ showEditModal: boolean = false;
   selectedEnseignantId: number | null = null;
   selectedModuleIds: number[] = [];
   
+    roleUtilisateur: string = '';
+    userId: number | null = null;
 
 // Nouvelle section
 unites: UnitePedagogique[] = [];
@@ -124,11 +126,22 @@ closeEditModal(): void {
 
   constructor(private enseignantService: EnseignantService) {}
 
+
+/*******  f9082c22-2d78-426c-81a9-786cbbc7d502  *******/
   ngOnInit(): void {
+     this.roleUtilisateur = localStorage.getItem('role') || '';
+  const id = localStorage.getItem('id');
+  this.userId = id ? Number(id) : null;
     this.initializeData();
     
   }
-
+get enseignantsAffiches(): EnseignantAvecModules[] {
+  if (this.roleUtilisateur === 'ENSEIGNANT' && this.userId != null) {
+    return this.enseignantsAvecModules.filter(e => e.id === this.userId);
+  }
+  // SUPER_ADMIN et ADMIN voient tout
+  return this.enseignantsAvecModules;
+}
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

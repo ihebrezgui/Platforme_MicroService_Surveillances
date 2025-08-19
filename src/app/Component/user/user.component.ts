@@ -17,8 +17,14 @@ import { User } from '../../Entity/User';
 export class UserComponent implements OnInit {
   users: User[] = [];
   isLoading: boolean = false;
+  role: string = '';
+  currentUserId: number = 0;
 
-  constructor(private userService: UserServiceService, private router: Router) {}
+  constructor(private userService: UserServiceService, private router: Router) {
+    // Récupérer role et id de l'utilisateur connecté depuis localStorage
+    this.role = localStorage.getItem('role') || '';
+    this.currentUserId = Number(localStorage.getItem('id')) || 0;
+  }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -28,7 +34,12 @@ export class UserComponent implements OnInit {
     this.isLoading = true;
     this.userService.getAllUsers().subscribe({
       next: (data) => {
-        this.users = data;
+        // Filtrage selon rôle
+        if (this.role === 'ENSEIGNANT') {
+          this.users = data.filter(u => u.id === this.currentUserId);
+        } else {
+          this.users = data;
+        }
         this.isLoading = false;
       },
       error: (err) => {
@@ -45,6 +56,8 @@ export class UserComponent implements OnInit {
   }
 
   toggleUserActive(user: User): void {
+    if (this.role !== 'SUPER_ADMIN') return; // seule super admin peut activer/désactiver
+
     const newStatus = !user.active;
     const actionText = newStatus ? 'activer' : 'désactiver';
     
@@ -85,6 +98,8 @@ export class UserComponent implements OnInit {
   }
 
   onDeleteUser(id: number): void {
+    if (this.role !== 'SUPER_ADMIN') return; // seule super admin peut supprimer
+
     Swal.fire({
       title: 'Êtes-vous sûr ?',
       text: "Cette action est irréversible !",
@@ -122,10 +137,12 @@ export class UserComponent implements OnInit {
   }
 
   updateUser(user: User): void {
+    if (this.role !== 'SUPER_ADMIN') return; // seule super admin peut modifier
     this.router.navigate(['/update-user', user.id]);
   }
 
   navigateToRegister(): void {
+    if (this.role !== 'SUPER_ADMIN' && this.role !== 'ADMIN') return; // seule super admin et admin peut ajouter
     this.router.navigate(['/register']);
   }
 
@@ -146,12 +163,10 @@ export class UserComponent implements OnInit {
     return user.id;
   }
 
-  // Method to refresh the user list
   refreshUsers(): void {
     this.loadUsers();
   }
 
-  // Method to get user count by status
   getActiveUsersCount(): number {
     return this.users.filter(user => user.active).length;
   }
@@ -160,21 +175,17 @@ export class UserComponent implements OnInit {
     return this.users.filter(user => !user.active).length;
   }
 
-  // Method to get role display color
   getRoleClass(role: string): string {
     if (!role) return '';
     return role.toLowerCase();
   }
 
-  // Method to format email for display
   formatEmail(email: string): string {
     if (!email) return '';
     return email.toLowerCase();
   }
 
-  // Method to handle table sorting (if needed in future)
   sortUsers(column: string): void {
-    // Implementation can be added based on requirements
     console.log(`Sorting by ${column}`);
   }
 }

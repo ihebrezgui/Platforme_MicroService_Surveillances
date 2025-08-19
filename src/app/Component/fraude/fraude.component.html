@@ -1,56 +1,61 @@
 <div class="container">
-  <h2>Déclarer une fraude</h2>
-  <form [formGroup]="fraudeForm" (ngSubmit)="onSubmit()">
 
-    <div>
-      <label>Nom Étudiant:</label>
-      <input formControlName="nomEtudiant">
-    </div>
+  <!-- FORMULAIRE : uniquement pour ENSEIGNANT -->
+  <div *ngIf="currentUser.role === 'ENSEIGNANT'">
+    <h2>Déclarer une fraude</h2>
+    <form [formGroup]="fraudeForm" (ngSubmit)="onSubmit()">
+      <div>
+        <label>Nom Étudiant:</label>
+        <input formControlName="nomEtudiant">
+      </div>
 
-    <div>
-      <label>Matricule Étudiant:</label>
-      <input formControlName="matricule">
-    </div>
+      <div>
+        <label>Matricule Étudiant:</label>
+        <input formControlName="matricule">
+      </div>
 
-    <div>
-      <label>Nom Enseignant:</label>
-      <input formControlName="nomEnseignant">
-    </div>
-<div>
-      <label>Matricule Enseignant:</label>
-      <input formControlName="matriculeEnseignant">
-    </div>
+      <div>
+        <label>Nom Enseignant:</label>
+        <input formControlName="nomEnseignant">
+      </div>
 
-    <div>
-      <label>Nom Groupe:</label>
-      <input formControlName="groupeNom">
-    </div>
+      <div>
+        <label>Matricule Enseignant:</label>
+        <input formControlName="matriculeEnseignant">
+      </div>
 
-    <div>
-      <label>Numéro Groupe:</label>
-      <input type="number" formControlName="groupeId">
-    </div>
+      <div>
+        <label>Nom Groupe:</label>
+        <input formControlName="groupeNom">
+      </div>
 
-    <div>
-      <label>Type de fraude:</label>
-      <select formControlName="type">
-        <option *ngFor="let t of typeOptions" [value]="t">{{ t }}</option>
-      </select>
-    </div>
+      <div>
+        <label>Numéro Groupe:</label>
+        <input type="number" formControlName="groupeId">
+      </div>
 
-    <div *ngIf="showTypeInput">
-      <label>Autre type:</label>
-      <input formControlName="autreType">
-    </div>
+      <div>
+        <label>Type de fraude:</label>
+        <select formControlName="type">
+          <option *ngFor="let t of typeOptions" [value]="t">{{ t }}</option>
+        </select>
+      </div>
 
-    <div>
-      <label>Description:</label>
-      <textarea formControlName="description"></textarea>
-    </div>
+      <div *ngIf="showTypeInput">
+        <label>Autre type:</label>
+        <input formControlName="autreType">
+      </div>
 
-    <button type="submit">Déclarer</button>
-  </form>
+      <div>
+        <label>Description:</label>
+        <textarea formControlName="description"></textarea>
+      </div>
 
+      <button type="submit">Déclarer</button>
+    </form>
+  </div>
+
+  <!-- TABLEAU DES FRAUDES : visible pour tous, actions selon rôle -->
   <h2>Liste des fraudes</h2>
   <label>Filtrer par statut:</label>
   <select [(ngModel)]="filtreStatut" (change)="filtrerFraudes()">
@@ -70,21 +75,25 @@
         <th>Type</th>
         <th>Description</th>
         <th>Statut</th>
-        <th>Actions</th>
+        <!-- Actions visibles seulement pour ADMIN et SUPER_ADMIN -->
+        <th *ngIf="currentUser.role !== 'ENSEIGNANT'">Actions</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let f of fraudes">
         <td>{{ f.nomEtudiant }}</td>
         <td>{{ f.matriculeEnseignant }}</td>
-        <td>{{ f.nomGroupe }}  </td>
+        <td>{{ f.nomGroupe }}</td>
         <td>{{ f.groupeId }}</td>
         <td>{{ f.type }}</td>
         <td>{{ f.description }}</td>
         <td>{{ f.statut }}</td>
-        <td>
+
+        <!-- Actions selon rôle -->
+        <td *ngIf="currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'ADMIN'">
           <button (click)="traiterFraude(f)" [disabled]="f.statut !== 'EN_ATTENTE'">Traiter</button>
-          <button (click)="archiverFraude(f)" [disabled]="f.statut !== 'RESOLUE'">Archiver</button>
+          <!-- Archiver uniquement pour SUPER_ADMIN -->
+          <button *ngIf="currentUser.role === 'SUPER_ADMIN'" (click)="archiverFraude(f)" [disabled]="f.statut !== 'RESOLUE'">Archiver</button>
         </td>
       </tr>
     </tbody>
