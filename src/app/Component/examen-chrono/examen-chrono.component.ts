@@ -1,7 +1,9 @@
-import { NotificationService } from './../../Service/notification.service';
+import { GlobalNotificationService } from './../../Service/global-notification.service';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+// Global notifications are now handled by GlobalNotificationService
 
 import { ExamenChrono, ExamenChronoRequestDTO, ExamenChronoService } from '../../Service/examen-chrono.service';
 import { MyModule } from '../../Entity/module.model';
@@ -15,6 +17,7 @@ import { SessionServiceService } from '../../Service/session-service.service';
 import { Enseignant } from '../../Entity/Enseignant';
 import { EnseignantService } from '../../Service/enseignant-service.service';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 interface CalendarEvent {
   id: number;
@@ -80,8 +83,9 @@ export class ExamenChronoComponent implements OnInit {
     private affectationService: AffectationService,
     private salleService: SalleService,
     private sessionService: SessionServiceService,
-    private enseignantService: EnseignantService,
-    private NotificationService : NotificationService,
+        private enseignantService: EnseignantService,
+    private notificationService: GlobalNotificationService,
+    private http: HttpClient
 
 
   ) {
@@ -93,21 +97,17 @@ export class ExamenChronoComponent implements OnInit {
       seance: ['', Validators.required]
     });
   }
-
+   // Global notifications are now handled by GlobalNotificationService
   ngOnInit(): void {
     this.initializeWeek();
     this.loadSessions();
     this.loadEnseignants();
     this.loadInitialData();
-    const enseignantId = 52;
-    this.NotificationService.connect(enseignantId);
+       const enseignantId = Number(localStorage.getItem('id'));
 
-    this.NotificationService.messages$.subscribe({
-  next: (notif) => {
-    console.log('Notification reçue pour l’enseignant 52:', notif);
-  },
-  error: err => console.error('Erreur lors de la réception de notification:', err)
-});
+  if (enseignantId) {
+    this.notificationService.connect(enseignantId);
+  }
 
     this.examenForm.get('periode')?.valueChanges.subscribe(periode => {
       this.loadModulesByPeriode(periode);
@@ -314,13 +314,25 @@ export class ExamenChronoComponent implements OnInit {
     });
 
     forkJoin(observables).subscribe({
-      next: () => {
+      next: (examens) => {
+        // Backend automatically sends notifications to assigned enseignants only
+        console.log('Examens créés avec succès:', examens);
+        
+        // Show success message to the creator
+        const module = this.modules.find(m => m.id === +formValue.moduleId);
+        const moduleName = module ? module.libelleModule : 'Module inconnu';
+        this.notificationService.addNotification(
+          `Examens créés avec succès pour ${moduleName} le ${formValue.dateExamen} à ${formValue.seance}. Les enseignants assignés ont été notifiés.`, 
+          'success'
+        );
+        
         this.loadExamens();
         this.toggleForm();
         this.isLoading = false;
       },
       error: err => {
         console.error('Erreur création examens:', err);
+        this.notificationService.addNotification('Erreur lors de la création des examens', 'error');
         this.isLoading = false;
       }
     });
@@ -424,4 +436,101 @@ export class ExamenChronoComponent implements OnInit {
   hasHiddenEvents(dateKey: string, seance: string): boolean {
     return this.getHiddenEventsCount(dateKey, seance) > 0;
   }
+
+  // Test method for notifications
+  testNotification(): void {
+    const enseignantId = Number(localStorage.getItem('id'));
+    if (enseignantId) {
+      this.notificationService.testNotification(enseignantId).subscribe({
+        next: (response) => {
+          console.log('Test notification response:', response);
+          this.notificationService.addNotification(`Test notification sent to enseignant ${enseignantId} - ${new Date().toLocaleTimeString()}`, 'success');
+        },
+        error: (err) => {
+          console.error('Test notification error:', err);
+          this.notificationService.addNotification(`Test notification failed for enseignant ${enseignantId} - ${new Date().toLocaleTimeString()}`, 'error');
+        }
+      });
+    } else {
+      this.notificationService.addNotification('No enseignant ID found for testing', 'warning');
+    }
+  }
+
+  // Test WebSocket connection
+  testWebSocketConnection(): void {
+    const enseignantId = Number(localStorage.getItem('id'));
+    if (enseignantId) {
+      if (this.notificationService.isConnected()) {
+        this.notificationService.addNotification(`WebSocket is connected for enseignant ${enseignantId}`, 'success');
+        // Send a test message
+        this.notificationService.sendGeneralNotification('Test message from frontend');
+      } else {
+        this.notificationService.addNotification(`WebSocket is not connected for enseignant ${enseignantId}`, 'warning');
+        // Try to reconnect
+        this.notificationService.connect(enseignantId);
+      }
+    } else {
+      this.notificationService.addNotification('No enseignant ID found for WebSocket test', 'warning');
+    }
+  }
+
+  // Test exam creation notification (simulates what happens when creating a real exam)
+  testExamCreationNotification(): void {
+    // Test with specific enseignant IDs (you can change these to test with different enseignants)
+    const testEnseignantIds = [1, 2]; // Example: Iheb (ID: 1) and Samara (ID: 2)
+    
+    if (testEnseignantIds.length > 0) {
+      // Send specific test notification to each enseignant
+      testEnseignantIds.forEach(enseignantId => {
+        const enseignant = this.enseignants.find(ens => ens.id === enseignantId);
+        const enseignantName = enseignant ? enseignant.nom : `Enseignant ${enseignantId}`;
+        
+        // Create personalized test message for each enseignant
+        const personalizedTestMessage = `Bonjour ${enseignantName}, vous avez été assigné à un examen: Test Module avec le groupe Test-Groupe le ${new Date().toLocaleDateString()} (séance: 08:00-10:00).`;
+        
+        this.notificationService.sendNotificationToEnseignants([enseignantId], personalizedTestMessage).subscribe({
+          next: (response) => {
+            console.log(`Test notification sent to enseignant ${enseignantName} (ID: ${enseignantId}):`, response);
+          },
+          error: (err) => {
+            console.error(`Test notification failed for enseignant ${enseignantName} (ID: ${enseignantId}):`, err);
+          }
+        });
+      });
+      
+      this.notificationService.addNotification(`Test notifications sent to ${testEnseignantIds.length} specific enseignants - ${new Date().toLocaleTimeString()}`, 'success');
+    } else {
+      this.notificationService.addNotification('No enseignants found for testing', 'warning');
+    }
+  }
+
+  // Test backend notifications directly
+  testBackendNotifications(): void {
+    // Test the backend endpoint directly
+    this.http.get('http://localhost:8090/test-notif-multiple').subscribe({
+      next: (response) => {
+        console.log('Backend test response:', response);
+        this.notificationService.addNotification('Backend notifications test sent successfully', 'success');
+      },
+      error: (err) => {
+        console.error('Backend test error:', err);
+        this.notificationService.addNotification('Backend notifications test failed', 'error');
+      }
+    });
+  }
+
+  // ===== NOTIFICATION SYSTEM EXPLANATION =====
+  // 
+  // How notifications work when creating exams:
+  // 1. When an exam is created via createExamenChrono(), the backend automatically:
+  //    - Assigns enseignants to the exam (1 or 2 based on group size)
+  //    - Sends notifications ONLY to those assigned enseignants
+  //    - Uses notificationService.notifyEnseignant(enseignantId, message)
+  //
+  // 2. Each enseignant receives notifications ONLY for exams they are assigned to
+  // 3. The frontend does NOT send additional notifications (to avoid duplicates)
+  // 4. Notifications appear in the global notification bell for each enseignant
+  //
+  // Example: If Iheb and Samara are assigned to an exam, only they receive notifications
+  // Other enseignants will NOT receive notifications for this exam
 }

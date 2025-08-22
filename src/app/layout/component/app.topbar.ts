@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
+import { GlobalNotificationsComponent } from '../../Component/global-notifications/global-notifications.component';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator],
+  imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, GlobalNotificationsComponent],
   template: `
     <div class="layout-topbar">
       <div class="layout-topbar-logo-container">
@@ -58,6 +59,9 @@ import { LayoutService } from '../service/layout.service';
 
       <div class="layout-topbar-actions">
         <div class="layout-config-menu">
+          <!-- Global Notifications -->
+          <app-global-notifications></app-global-notifications>
+          
           <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
             <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
           </button>

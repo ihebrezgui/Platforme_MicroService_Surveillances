@@ -29,14 +29,12 @@
         "@stomp/stompjs": "^7.1.1",
         "angular-calendar": "^0.31.1",
         "chart.js": "4.4.2",
-        "crypto-browserify": "^3.12.1",
         "date-fns": "^4.1.0",
         "primeclt": "^0.1.5",
         "primeicons": "^7.0.0",
         "primeng": "^19.0.8",
         "rxjs": "~7.8.0",
         "sockjs-client": "^1.5.2",
-        "stream-browserify": "^3.0.0",
         "sweetalert2": "^11.6.13",
         "tailwindcss-primeui": "^0.5.1",
         "tslib": "^2.3.0",
@@ -50,6 +48,7 @@
         "@types/sockjs-client": "^1.5.4",
         "autoprefixer": "^10.4.20",
         "buffer": "^6.0.3",
+        "crypto-browserify": "^3.12.1",
         "eslint": "^9.14.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-import": "^2.31.0",
@@ -64,7 +63,9 @@
         "postcss": "^8.4.49",
         "prettier": "^3.0.0",
         "process": "^0.11.10",
+        "stream-browserify": "^3.0.0",
         "tailwindcss": "^3.4.17",
-        "typescript": "~5.6.2"
+        "typescript": "~5.6.2",
+        "vite-plugin-node-polyfills": "^0.24.0"
     }
 }

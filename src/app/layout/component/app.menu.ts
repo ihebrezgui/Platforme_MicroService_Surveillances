@@ -132,7 +132,7 @@ export class AppMenu implements OnInit {
         ]
       }] : []),
 
-      ...(role === 'SUPER_ADMIN' || role === 'ADMIN' ? [{
+      ...(role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'ENSEIGNANT' ? [{
         label: 'Gestion des Examens',
         items: [
           { label: 'Affectation Classes/salles/Enseignants', icon: 'pi pi-fw pi-id-card', routerLink: ['/GestionExamen'] },
