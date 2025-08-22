@@ -52,7 +52,7 @@ public class AuthController {
         this.mailService = mailService;// Injection correcte
     }
 
-    @ResponseBody
+   /* @ResponseBody
     @PostMapping("/register")
     public ResponseEntity<UserDTO> registerUser(@RequestBody User user) {
         if (user.getPassword() == null || user.getPassword().isBlank()) {
@@ -61,6 +61,46 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
 
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(savedUser.getId());
+        userDTO.setMatricule(savedUser.getMatricule());
+        userDTO.setUsername(savedUser.getUsername());
+        userDTO.setEmail(savedUser.getEmail());
+        userDTO.setRole(savedUser.getRole().name());
+
+        return ResponseEntity.ok(userDTO);
+    }
+*/
+
+    @ResponseBody
+    @PostMapping("/register")
+    public ResponseEntity<UserDTO> registerUser(@RequestBody User user) {
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // 1️⃣ Envoyer un email simple avant de hasher le mot de passe
+        String subject = "Bienvenue sur notre plateforme";
+        String message = "<p>Bonjour " + user.getUsername() + ",</p>" +
+                "<p>Merci pour votre inscription !</p>" +
+                "<p>Votre matricule : " + user.getMatricule() + "</p>" +
+                "<p>Votre mot de passe : " + user.getPassword() + "</p>" +
+                "<p>Vous pouvez maintenant vous connecter après validation.</p>";
+
+        try {
+            mailService.sendEmail(user.getEmail(), subject, message);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null); // ou un message d'erreur si l'email échoue
+        }
+
+        // 2️⃣ Hasher le mot de passe
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // 3️⃣ Stocker l'utilisateur
+        User savedUser = userRepository.save(user);
+
+        // 4️⃣ Retourner le DTO
         UserDTO userDTO = new UserDTO();
         userDTO.setId(savedUser.getId());
         userDTO.setMatricule(savedUser.getMatricule());
