@@ -34,9 +34,12 @@ export class GlobalNotificationService {
     }
 
     this.stompClient = new Client({
-      brokerURL: `ws://localhost:8090/ws?id=${enseignantId}`,
+      brokerURL: 'ws://localhost:8090/ws',
       reconnectDelay: 5000,
-      debug: (str) => console.log('WebSocket Debug:', str)
+      debug: (str) => console.log('WebSocket Debug:', str),
+      connectHeaders: {
+        'id': enseignantId.toString()
+      }
     });
 
     this.stompClient.onConnect = () => {
@@ -80,6 +83,20 @@ export class GlobalNotificationService {
       this.stompClient.deactivate();
       console.log('Global WebSocket disconnected');
     }
+  }
+
+  isConnected(): boolean {
+    return this.stompClient && this.stompClient.connected;
+  }
+
+  getConnectionStatus(): string {
+    if (!this.stompClient) {
+      return 'Not initialized';
+    }
+    if (this.stompClient.connected) {
+      return 'Connected';
+    }
+    return 'Disconnected';
   }
 
   // Add a new notification to the list
@@ -173,10 +190,6 @@ export class GlobalNotificationService {
     return this.http.get(`http://localhost:8090/test-notif/${enseignantId}`);
   }
 
-  // Get connection status
-  isConnected(): boolean {
-    return this.stompClient ? this.stompClient.connected : false;
-  }
 
   // Save notifications to localStorage
   private saveNotificationsToStorage(notifications: NotificationMessage[]): void {

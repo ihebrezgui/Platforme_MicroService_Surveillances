@@ -1,41 +1,310 @@
 <div class="session-container">
+  <!-- Header -->
   <div class="header">
-    <h2>📅 Gestion des Sessions</h2>
-    <button class="btn-add" (click)="openAddForm()">
-      <i class="plus-icon">+</i> Ajouter Session
-    </button>
+    <div class="header-info">
+      <h2>📅 Gestion des Sessions</h2>
+      <p class="session-count">{{ sessions.length }} session(s) enregistrée(s)</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="toggleImportSection()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        {{ showImportSection ? 'Masquer Import' : 'Importer CSV' }}
+      </button>
+      <button class="btn btn-add" (click)="openAddForm()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Ajouter Session
+      </button>
+    </div>
+  </div>
+
+  <!-- Import CSV Section -->
+  <div class="import-section" *ngIf="showImportSection">
+    <div class="import-container">
+      <div class="import-header">
+        <h3>📂 Importer des Sessions depuis un fichier CSV</h3>
+        <p class="import-description">
+          Format attendu: nom_session, periode, typeSession, dateDebut, dateFin
+        </p>
+      </div>
+      
+      <div class="import-body">
+        <div class="file-input-wrapper">
+          <input 
+            type="file" 
+            id="csvFile" 
+            accept=".csv"
+            (change)="onFileSelected($event)"
+            class="file-input">
+          <label for="csvFile" class="file-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+              <polyline points="13 2 13 9 20 9"></polyline>
+            </svg>
+            <span *ngIf="!selectedFile">Choisir un fichier CSV</span>
+            <span *ngIf="selectedFile" class="file-name">{{ selectedFile.name }}</span>
+          </label>
+        </div>
+
+        <button 
+          class="btn btn-import" 
+          (click)="importCsv()"
+          [disabled]="!selectedFile">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 16 12 12 8 16"></polyline>
+            <line x1="12" y1="12" x2="12" y2="21"></line>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+          </svg>
+          Importer
+        </button>
+      </div>
+
+      <div class="import-info">
+        <div class="info-box">
+          <h4>💡 Format du fichier CSV</h4>
+          <p>Exemple de contenu :</p>
+          <code>
+            Session Principale S1P1,PERIODE_1,NORMALE,2024-01-15,2024-02-15<br>
+            Session Rattrapage S1P1,PERIODE_1,RATTRAPAGE,2024-02-20,2024-03-10
+          </code>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Modal Form -->
   <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>{{ editing ? '✏️ Modifier la Session' : '➕ Ajouter Nouvelle Session' }}</h3>
+        <h3>{{ editing ? '✏️ Modifier la Session' : '➕ Nouvelle Session' }}</h3>
         <button class="close-btn" (click)="closeForm()">&times;</button>
       </div>
       
       <form (ngSubmit)="saveSession()" #form="ngForm" class="session-form">
         <div class="form-group">
-          <label for="sessionName">Nom de la Session</label>
+          <label for="sessionName">Nom de la Session *</label>
           <input
             id="sessionName"
             type="text"
             name="nom"
             [(ngModel)]="sessionModel.nom_session"
-            placeholder="Ex: Session Automne 2024"
+            placeholder="Ex: Session Principale S1P1"
             required
             class="session-input" />
         </div>
 
+        <div class="form-row">
+          <div class="form-group">
+            <label for="periode">Période *</label>
+            <select id="periode" name="periode" [(ngModel)]="sessionModel.periode" required class="session-input">
+              <option value="" disabled>Sélectionnez une période</option>
+              <option value="PERIODE_1">Période 1 (Semestre 1)</option>
+              <option value="PERIODE_2">Période 2 (Semestre 1)</option>
+              <option value="PERIODE_3">Période 3 (Semestre 2)</option>
+              <option value="PERIODE_4">Période 4 (Semestre 2)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="typeSession">Type de Session *</label>
+            <select id="typeSession" name="typeSession" [(ngModel)]="sessionModel.typeSession" required class="session-input">
+              <option value="" disabled>Sélectionnez un type</option>
+              <option value="NORMALE">Session Normale</option>
+              <option value="RATTRAPAGE">Session de Rattrapage</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dateDebut">Date de Début *</label>
+            <input
+              id="dateDebut"
+              type="date"
+              name="dateDebut"
+              [(ngModel)]="sessionModel.dateDebut"
+              required
+              class="session-input" />
+          </div>
+
+          <div class="form-group">
+            <label for="dateFin">Date de Fin *</label>
+            <input
+              id="dateFin"
+              type="date"
+              name="dateFin"
+              [(ngModel)]="sessionModel.dateFin"
+              required
+              class="session-input" />
+          </div>
+        </div>
+
         <div class="form-actions">
           <button type="submit" class="btn-save" [disabled]="!form.valid">
-            {{ editing ? '💾 Mettre à jour' : '✅ Enregistrer' }}
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            {{ editing ? 'Mettre à jour' : 'Enregistrer' }}
           </button>
           <button type="button" class="btn-cancel" (click)="closeForm()">
-            ❌ Annuler
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            Annuler
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Module Assignment Modal -->
+  <div class="modal-overlay" *ngIf="showModuleAssignment" (click)="closeModuleAssignment()">
+    <div class="modal-content module-assignment-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📚 Assigner des Modules</h3>
+        <button class="close-btn" (click)="closeModuleAssignment()">&times;</button>
+      </div>
+      
+      <div class="module-assignment-content">
+        <div class="modules-list">
+          <div class="modules-header">
+            <h4>Session: {{ selectedSession?.nom_session }}</h4>
+            <div class="search-controls">
+              <div class="search-input-group">
+                <input 
+                  type="text" 
+                  [(ngModel)]="moduleSearchTerm"
+                  (input)="searchModules()"
+                  placeholder="🔍 Rechercher un module..."
+                  class="module-search-input">
+                <button 
+                  *ngIf="moduleSearchTerm"
+                  (click)="clearSearch()" 
+                  class="clear-search-btn"
+                  title="Effacer la recherche">
+                  ×
+                </button>
+              </div>
+              <button 
+                (click)="toggleShowAllModules()" 
+                class="toggle-all-btn"
+                [class.active]="showAllModules">
+                {{ showAllModules ? '📋 Afficher 10 premiers' : '📋 Voir tous' }}
+              </button>
+            </div>
+          </div>
+          
+          <div class="module-checkboxes">
+            <div class="modules-count">
+              {{ filteredModules.length }} module(s) disponible(s) • {{ selectedModuleIds.length }} sélectionné(s)
+            </div>
+            <label 
+              *ngFor="let module of filteredModules" 
+              class="module-checkbox-item">
+              <input 
+                type="checkbox" 
+                [checked]="isModuleSelected(module.id)"
+                (change)="toggleModuleSelection(module.id)">
+              <span class="module-info">
+                <strong>{{ module.libelleModule }}</strong>
+                <small>{{ module.codeModule }}</small>
+              </span>
+            </label>
+            
+            <div *ngIf="filteredModules.length === 0" class="no-modules-found">
+              <p>🔍 Aucun module trouvé</p>
+              <button (click)="clearSearch()" class="clear-search-btn">Effacer la recherche</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="btn-save" 
+            (click)="saveModuleAssignment()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Enregistrer ({{ selectedModuleIds.length }})
+          </button>
+          <button 
+            type="button" 
+            class="btn-cancel" 
+            (click)="closeModuleAssignment()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Assigned Modules Modal -->
+  <div class="modal-overlay" *ngIf="showAssignedModules" (click)="closeAssignedModulesView()">
+    <div class="modal-content assigned-modules-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>👁️ Modules Assignés</h3>
+        <button class="close-btn" (click)="closeAssignedModulesView()">&times;</button>
+      </div>
+      
+      <div class="assigned-modules-content">
+        <div class="assigned-modules-list" *ngIf="assignedModulesToView.length > 0">
+          <div class="modules-count">
+            Session: {{ selectedSession?.nom_session }} • {{ assignedModulesToView.length }} module(s) assigné(s)
+          </div>
+          <div class="assigned-modules-grid">
+            <div 
+              *ngFor="let module of assignedModulesToView" 
+              class="assigned-module-card">
+              <div class="module-info">
+                <h4>{{ module.libelleModule }}</h4>
+                <p class="module-code">📌 {{ module.codeModule }}</p>
+                <p class="module-unite" *ngIf="module.unitePedagogique">
+                  🎓 {{ module.unitePedagogique.libelle }}
+                </p>
+              </div>
+              <div class="module-actions">
+                <button 
+                  class="btn-remove-assigned" 
+                  (click)="removeModuleFromAssignedView(module.id)"
+                  title="Supprimer ce module">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="no-assigned-modules" *ngIf="assignedModulesToView.length === 0">
+          <div class="empty-icon">📭</div>
+          <h3>Aucun module assigné</h3>
+          <p>Cette session n'a pas encore de modules assignés</p>
+          <button 
+            class="btn-assign-modules" 
+            (click)="closeAssignedModulesView(); openModuleAssignment(selectedSession!)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Assigner des modules
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -54,14 +323,53 @@
           <div class="session-details">
             <h4 class="session-name">{{ session.nom_session }}</h4>
             <p class="session-id">ID: {{ session.id }}</p>
+            <div class="session-period" *ngIf="session.dateDebut && session.dateFin">
+              <p class="period-text">
+                📅 {{ formatPeriod(session.dateDebut, session.dateFin) }}
+              </p>
+            </div>
+            <div class="session-academic-info" *ngIf="session.periode || session.typeSession">
+              <p class="academic-text" *ngIf="session.periode">
+                🎓 {{ getPeriodeDisplayName(session.periode) }}
+              </p>
+              <p class="academic-text" *ngIf="session.typeSession">
+                📝 {{ getTypeSessionDisplayName(session.typeSession) }}
+              </p>
+            </div>
           </div>
         </div>
         <div class="session-actions">
-          <button class="btn-edit" (click)="editSession(session)" title="Modifier">
-            ✏️ Modifier
+          <button 
+            class="icon-btn btn-view-assigned" 
+            (click)="viewAssignedModules(session)" 
+            title="Voir les modules assignés"
+            [disabled]="!session.moduleIds || session.moduleIds.length === 0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span class="btn-text">Voir ({{ session.moduleIds?.length || 0 }})</span>
           </button>
-          <button class="btn-delete" (click)="deleteSession(session.id)" title="Supprimer">
-            🗑️ Supprimer
+          <button class="icon-btn btn-assign" (click)="openModuleAssignment(session)" title="Assigner Modules">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            <span class="btn-text">Modules</span>
+          </button>
+          <button class="icon-btn btn-edit" (click)="editSession(session)" title="Modifier">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            <span class="btn-text">Modifier</span>
+          </button>
+          <button class="icon-btn btn-delete" (click)="deleteSession(session.id)" title="Supprimer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span class="btn-text">Supprimer</span>
           </button>
         </div>
       </div>
@@ -71,9 +379,13 @@
     <div class="empty-state" *ngIf="sessions.length === 0">
       <div class="empty-icon">📭</div>
       <h3>Aucune session disponible</h3>
-      <p>Commencez par créer votre première session</p>
+      <p>Commencez par créer votre première session pour gérer les examens et les modules</p>
       <button class="btn-create-first" (click)="openAddForm()">
-        ✨ Créer la première session
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Créer la première session
       </button>
     </div>
   </div>

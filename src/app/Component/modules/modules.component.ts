@@ -25,21 +25,27 @@ export class ModulesComponent implements OnInit, OnDestroy {
   modules: MyModule[] = [];
   enseignantsAvecModules: EnseignantAvecModules[] = [];
   showAssignModal: boolean = false;
-showEditModal: boolean = false;
+  showEditModal: boolean = false;
   
   selectedEnseignantId: number | null = null;
   selectedModuleIds: number[] = [];
   
-    roleUtilisateur: string = '';
-    userId: number | null = null;
+  roleUtilisateur: string = '';
+  userId: number | null = null;
 
-// Nouvelle section
-unites: UnitePedagogique[] = [];
-selectedUniteId: number | null = null;
+  // Nouvelle section
+  unites: UnitePedagogique[] = [];
+  selectedUniteId: number | null = null;
 
-enseignantsFiltres: Enseignant[] = [];
-modulesFiltres: MyModule[] = [];
-modulesHorsUPFiltres: MyModule[] = [];
+  enseignantsFiltres: Enseignant[] = [];
+  modulesFiltres: MyModule[] = [];
+  modulesHorsUPFiltres: MyModule[] = [];
+
+  // Pagination properties
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  searchTerm: string = '';
+  filteredEnseignantsAvecModules: EnseignantAvecModules[] = [];
 
 
 onUniteChange(selectedId: number | null): void {
@@ -136,11 +142,26 @@ closeEditModal(): void {
     
   }
 get enseignantsAffiches(): EnseignantAvecModules[] {
+  let filteredData: EnseignantAvecModules[] = [];
+  
   if (this.roleUtilisateur === 'ENSEIGNANT' && this.userId != null) {
-    return this.enseignantsAvecModules.filter(e => e.id === this.userId);
+    filteredData = this.enseignantsAvecModules.filter(e => e.id === this.userId);
+  } else {
+    // SUPER_ADMIN et ADMIN voient tout
+    filteredData = this.enseignantsAvecModules;
   }
-  // SUPER_ADMIN et ADMIN voient tout
-  return this.enseignantsAvecModules;
+
+  // Apply search filter
+  if (this.searchTerm.trim()) {
+    const searchLower = this.searchTerm.toLowerCase();
+    filteredData = filteredData.filter(ens => 
+      ens.nom.toLowerCase().includes(searchLower) ||
+      ens.modules?.some(mod => mod.libelleModule.toLowerCase().includes(searchLower))
+    );
+  }
+
+  this.filteredEnseignantsAvecModules = filteredData;
+  return this.getPaginatedEnseignants();
 }
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -167,7 +188,7 @@ private loadEnseignants(): Promise<void> {
       .subscribe({
         next: (data) => {
           this.enseignants = data || [];
-          this.onUniteChange // <== Ici, juste après avoir mis à jour enseignants
+          this.onUniteChange(this.selectedUniteId);
           resolve();
         },
         error: (err) => {
@@ -315,7 +336,8 @@ get modulesHorsUP(): MyModule[] {
         next: () => {
           this.showSuccessAlert('Modules affectés avec succès');
           this.resetForm();
-          this.toggleForm();
+          this.closeAssignModal();
+          this.closeEditModal();
           this.loadEnseignantsAvecModules();
         },
         error: () => {
@@ -416,6 +438,107 @@ async confirmDeleteSelectedModules(): Promise<void> {
 
   trackByModuleLibelle(index: number, module: MyModule): string {
     return module.libelleModule;
+  }
+
+  // Pagination methods
+  getPaginatedEnseignants(): EnseignantAvecModules[] {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return this.filteredEnseignantsAvecModules.slice(startIndex, endIndex);
+  }
+
+  getTotalPages(): number {
+    return Math.ceil(this.filteredEnseignantsAvecModules.length / this.itemsPerPage);
+  }
+
+  getStartIndex(): number {
+    return (this.currentPage - 1) * this.itemsPerPage;
+  }
+
+  getEndIndex(): number {
+    return Math.min(this.getStartIndex() + this.itemsPerPage, this.filteredEnseignantsAvecModules.length);
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.getTotalPages()) {
+      this.currentPage++;
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.getTotalPages()) {
+      this.currentPage = page;
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const totalPages = this.getTotalPages();
+    const currentPage = this.currentPage;
+    const pages: number[] = [];
+
+    // Always show first page
+    if (totalPages > 0) {
+      pages.push(1);
+    }
+
+    // Show pages around current page
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+
+    // Add ellipsis if there's a gap
+    if (start > 2) {
+      pages.push(-1); // -1 represents ellipsis
+    }
+
+    // Add pages around current page
+    for (let i = start; i <= end; i++) {
+      if (i > 1 && i < totalPages) {
+        pages.push(i);
+      }
+    }
+
+    // Add ellipsis if there's a gap
+    if (end < totalPages - 1) {
+      pages.push(-2); // -2 represents ellipsis
+    }
+
+    // Always show last page if there's more than one page
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+
+    return pages;
+  }
+
+  // Search methods
+  onSearchChange(): void {
+    this.currentPage = 1; // Reset to first page when searching
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.currentPage = 1;
+  }
+
+  onItemsPerPageChange(): void {
+    this.currentPage = 1; // Reset to first page when changing items per page
+  }
+
+  // Utility methods
+  getInitials(name: string): string {
+    if (!name) return '';
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   }
 
   private showSuccessAlert(message: string): void {

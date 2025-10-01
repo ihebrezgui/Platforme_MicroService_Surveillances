@@ -52,7 +52,6 @@ export interface Groupe {
 export class EmploiDuTempsService {
 
   private baseUrl = 'http://localhost:8090/ensignat';
-  
   private URL = 'http://localhost:8090/emplois';
   private Url = 'http://localhost:8093/emploi_enseignant';
 

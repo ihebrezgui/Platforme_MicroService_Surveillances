@@ -22,6 +22,11 @@ export class GroupeManagerComponent implements OnInit {
   isEditing = false;
   showForm = false;
 
+  // Filter properties
+  searchTerm: string = '';
+  optionFilter: string = 'all';
+  filteredGroupes: Groupe[] = [];
+
   constructor(private groupeService: ModuleServiceService) {}
 
   ngOnInit(): void {
@@ -29,7 +34,66 @@ export class GroupeManagerComponent implements OnInit {
   }
 
   loadGroupes(): void {
-    this.groupeService.getAllGroupes().subscribe(data => this.groupes = data);
+    this.groupeService.getAllGroupes().subscribe(data => {
+      this.groupes = data;
+      this.applyFilters();
+    });
+  }
+
+  // Filter methods
+  onSearchChange(): void {
+    this.applyFilters();
+  }
+
+  onOptionFilterChange(option: string): void {
+    this.optionFilter = option;
+    this.applyFilters();
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.applyFilters();
+  }
+
+  clearAllFilters(): void {
+    this.searchTerm = '';
+    this.optionFilter = 'all';
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.groupes];
+
+    // Apply search filter
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(groupe => 
+        this.getDisplayClassName(groupe).toLowerCase().includes(searchLower) ||
+        groupe.niveau.toLowerCase().includes(searchLower) ||
+        groupe.departement.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply option filter
+    if (this.optionFilter !== 'all') {
+      filtered = filtered.filter(groupe => groupe.optionGroupe === this.optionFilter);
+    }
+
+    this.filteredGroupes = filtered;
+  }
+
+  get filteredOptionKeys(): string[] {
+    if (this.optionFilter === 'all') {
+      return this.optionKeys.filter(option => 
+        this.getFilteredGroupesForOption(option).length > 0
+      );
+    } else {
+      return this.optionFilter ? [this.optionFilter] : [];
+    }
+  }
+
+  getFilteredGroupesForOption(option: string): Groupe[] {
+    return this.filteredGroupes.filter(groupe => groupe.optionGroupe === option);
   }
 
   // Generate the display name by concatenating niveau + option + nomClasse

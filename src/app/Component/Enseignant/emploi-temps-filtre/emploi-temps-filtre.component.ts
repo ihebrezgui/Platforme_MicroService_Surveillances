@@ -23,11 +23,9 @@ interface FiltersState {
   templateUrl: './emploi-temps-filtre.component.html',
   styleUrl: './emploi-temps-filtre.component.scss'
 })
-
-
 export class EmploiTempsFiltreComponent implements OnInit {
 
-emploi: EmploiDuTemps[] = [];
+  emploi: EmploiDuTemps[] = [];
   groupes: Groupe[] = [];
   enseignants: Enseignant[] = [];
 
@@ -152,7 +150,8 @@ emploi: EmploiDuTemps[] = [];
     this.selectedGroupeId = val ? +val : null;
     this.chargerEmploisEtSemaine(this.selectedDate);
   }
-    navigateToAjouterEmploidutemps() {
-  this.router.navigate(['addCalendrier/{{id}}']);
-}
+
+  navigateToAjouterEmploidutemps() {
+    this.router.navigate(['addCalendrier/{{id}}']);
+  }
 }

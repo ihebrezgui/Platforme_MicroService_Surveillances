@@ -47,6 +47,7 @@ export class AddEnseignantComponent implements OnInit {
       moduleId: ['', Validators.required],
       unitePedagogiqueId: ['', Validators.required], // Stocke l'id de l'unité sélectionnée
       grade: ['', Validators.required],
+      statut: ['', Validators.required], // Nouveau champ statut
     });
 
     // Quand unité pédagogique change, on réinitialise le module
@@ -125,6 +126,7 @@ export class AddEnseignantComponent implements OnInit {
     id: formValue.unitePedagogiqueId,
   },
         grade: formValue.grade,
+        statut: formValue.statut, // Ajout du statut
       };
 
       this.enseignantService.addEnseignant(enseignant).subscribe({

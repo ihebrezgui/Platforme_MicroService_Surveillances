@@ -115,8 +115,8 @@ export class AppMenu implements OnInit {
           items: [
             { label: 'Modules', icon: 'pi pi-fw pi-id-card', routerLink: ['/module_manger'] },
             { label: 'Sessions', icon: 'pi pi-fw pi-id-card', routerLink: ['/session'] },
-            { label: 'Classe/Modules', icon: 'pi pi-fw pi-id-card', routerLink: ['/AffectationClasse'] },
-            { label: 'Enseignant/Module', icon: 'pi pi-fw pi-id-card', routerLink: ['/modules'] }
+            { label: 'Classes ↔ Modules', icon: 'pi pi-fw pi-id-card', routerLink: ['/AffectationClasse'] },
+            { label: 'Enseignant ↔ Module', icon: 'pi pi-fw pi-id-card', routerLink: ['/modules'] }
           ]
             }] : role === 'ENSEIGNANT' ? [{
               label: 'Gestion des modules',
@@ -135,10 +135,11 @@ export class AppMenu implements OnInit {
       ...(role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'ENSEIGNANT' ? [{
         label: 'Gestion des Examens',
         items: [
-          { label: 'Affectation Classes/salles/Enseignants', icon: 'pi pi-fw pi-id-card', routerLink: ['/GestionExamen'] },
+          ...(role !== 'ENSEIGNANT' ? [{ label: 'Affectation Classes/salles/Enseignants', icon: 'pi pi-fw pi-id-card', routerLink: ['/GestionExamen'] }] : []),
           { label: 'Affectation Chrono', icon: 'pi pi-fw pi-id-card', routerLink: ['/examanchreno'] }
         ]
-      }] : []),
+    }] : []),
+    
 
       ...(role === 'SUPER_ADMIN' || role === 'ADMIN' ? [{
         label: 'Calendrier des Enseignants',
@@ -147,12 +148,7 @@ export class AppMenu implements OnInit {
         ]
       }] : []),
 
-      ...(role === 'SUPER_ADMIN' || role === 'ADMIN' ? [{
-        label: 'Calendrier des Surveillances',
-        items: [
-          { label: 'Emploi du surveillance', icon: 'pi pi-fw pi-id-card', routerLink: ['/Surveillance'] }
-        ]
-      }] : []),
+     
 
       ...(role === 'SUPER_ADMIN' || role === 'ADMIN' ? [{
         label: 'Gestion des salles',

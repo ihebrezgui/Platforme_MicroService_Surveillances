@@ -18,6 +18,7 @@ export class UpdateUserComponent implements OnInit {
   updateUserForm!: FormGroup;
   userId!: number;
   userData!: User;
+  isSubmitting: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -52,7 +53,12 @@ export class UpdateUserComponent implements OnInit {
             role: foundUser.role
           });
         } else {
-          alert('Utilisateur introuvable.');
+          Swal.fire({
+            icon: 'error',
+            title: 'Utilisateur introuvable',
+            text: 'L\'utilisateur demandé n\'existe pas.',
+            confirmButtonColor: '#ef4444'
+          });
           this.navigateToUsers();
         }
       },
@@ -65,6 +71,8 @@ export class UpdateUserComponent implements OnInit {
   onSubmit(): void {
     if (this.updateUserForm.invalid) return;
 
+    this.isSubmitting = true;
+
     const updatedUser: User = {
       ...this.userData,
       ...this.updateUserForm.value,
@@ -73,12 +81,25 @@ export class UpdateUserComponent implements OnInit {
 
     this.userService.updateUser(this.userId, updatedUser).subscribe({
       next: () => {
-        alert('Utilisateur mis à jour avec succès.');
+        Swal.fire({
+          icon: 'success',
+          title: 'Succès!',
+          text: 'Utilisateur mis à jour avec succès.',
+          confirmButtonColor: '#2563eb'
+        });
         this.navigateToUsers();
       },
       error: (err) => {
         console.error('Erreur mise à jour:', err);
-        alert('Erreur lors de la mise à jour.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur!',
+          text: 'Erreur lors de la mise à jour de l\'utilisateur.',
+          confirmButtonColor: '#ef4444'
+        });
+      },
+      complete: () => {
+        this.isSubmitting = false;
       }
     });
   }

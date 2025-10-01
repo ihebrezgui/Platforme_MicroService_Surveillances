@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
+  standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
@@ -57,6 +58,7 @@ export class RegisterComponent implements OnInit {
       matricule: ['', [Validators.required, Validators.minLength(3)]],
       telephone: ['', Validators.required],
       grade: ['', Validators.required],
+      statut: ['', Validators.required],
       unitePedagogiqueId: ['', Validators.required],
       // moduleId supprimé ici
     });
@@ -135,6 +137,7 @@ export class RegisterComponent implements OnInit {
 const enseignant: Partial<Enseignant> = {
   telephone: formData.telephone,
   grade: formData.grade,
+  statut: formData.statut,
   unitePedagogique: {
     id: +formData.unitePedagogiqueId  // Important : envoyer l'id ici
   },

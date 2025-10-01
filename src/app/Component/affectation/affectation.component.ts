@@ -32,6 +32,7 @@ export class AffectationComponent implements OnInit {
 
   selectedGroupeIds: number[] = [];
   selectedPeriode: string = 'PERIODE_1';
+  isLoading: boolean = false;
 
   periodes = ['PERIODE_1', 'PERIODE_2', 'PERIODE_3', 'PERIODE_4'];
 
@@ -95,25 +96,46 @@ onOptionGroupeChange(event: Event) {
     console.log('selectedGroupeIds:', this.selectedGroupeIds);
     console.log('selectedPeriode:', this.selectedPeriode);
 
-    if (!this.selectedModuleId || this.selectedGroupeIds.length === 0 || !this.selectedPeriode) {
-      Swal.fire('⚠️ Attention', 'Veuillez sélectionner un module, au moins un groupe, et une période.', 'warning');
+    if (!this.isFormValid()) {
+      Swal.fire({
+        title: 'Attention',
+        text: 'Veuillez sélectionner un module, au moins un groupe, et une période.',
+        icon: 'warning',
+        confirmButtonColor: '#f59e0b'
+      });
       return;
     }
 
+    this.isLoading = true;
+
     const request: AffectationRequestDTO = {
-      moduleId: this.selectedModuleId,
+      moduleId: this.selectedModuleId!,
       groupeIds: this.selectedGroupeIds,
       periode: this.selectedPeriode
     };
 
     this.affectationService.affecterModuleAGroupes(request).subscribe({
       next: res => {
-        Swal.fire('✅ Succès', res, 'success');
+        this.isLoading = false;
+        Swal.fire({
+          title: 'Succès!',
+          text: res || 'Module affecté avec succès',
+          icon: 'success',
+          confirmButtonColor: '#10b981',
+          timer: 2000,
+          timerProgressBar: true
+        });
         this.loadAffectations();
-        this.selectedGroupeIds = [];
+        this.clearSelection();
       },
-      error: () => {
-        Swal.fire('❌ Erreur', 'Une erreur est survenue lors de l\'affectation.', 'error');
+      error: (err) => {
+        this.isLoading = false;
+        Swal.fire({
+          title: 'Erreur',
+          text: err.error?.message || 'Une erreur est survenue lors de l\'affectation',
+          icon: 'error',
+          confirmButtonColor: '#ef4444'
+        });
       }
     });
   }
@@ -125,11 +147,67 @@ onOptionGroupeChange(event: Event) {
   }
 
   deleteAffectation(id: number) {
-    this.affectationService.deleteAffectation(id).subscribe(() => {
-      Swal.fire('🗑️ Supprimé', 'Affectation supprimée avec succès.', 'info');
-      this.loadAffectations();
+    Swal.fire({
+      title: 'Êtes-vous sûr ?',
+      text: "Cette action est irréversible !",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Oui, supprimer !',
+      cancelButtonText: 'Annuler'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.affectationService.deleteAffectation(id).subscribe({
+          next: () => {
+            this.loadAffectations();
+            Swal.fire({
+              title: 'Supprimé !',
+              text: 'Affectation supprimée avec succès',
+              icon: 'success',
+              confirmButtonColor: '#10b981',
+              timer: 2000,
+              timerProgressBar: true
+            });
+          },
+          error: (err) => {
+            Swal.fire({
+              title: 'Erreur',
+              text: err.error?.message || 'Échec de la suppression',
+              icon: 'error',
+              confirmButtonColor: '#ef4444'
+            });
+          }
+        });
+      }
     });
   }
 
-  
+  // Helper methods for the improved form
+  getSelectedModuleName(): string {
+    const module = this.modules.find(m => m.id === this.selectedModuleId);
+    return module ? module.libelleModule : '';
+  }
+
+  getPeriodeDisplayName(periode: string): string {
+    const periodeMap: { [key: string]: string } = {
+      'PERIODE_1': 'Période 1 (Semestre 1)',
+      'PERIODE_2': 'Période 2 (Semestre 1)', 
+      'PERIODE_3': 'Période 3 (Semestre 2)',
+      'PERIODE_4': 'Période 4 (Semestre 2)'
+    };
+    return periodeMap[periode] || periode;
+  }
+
+  isFormValid(): boolean {
+    return !!(this.selectedModuleId && this.selectedPeriode && this.selectedGroupeIds.length > 0);
+  }
+
+  selectAllClasses(): void {
+    this.selectedGroupeIds = this.filteredGroupes.map(g => g.id!);
+  }
+
+  clearSelection(): void {
+    this.selectedGroupeIds = [];
+  }
 }

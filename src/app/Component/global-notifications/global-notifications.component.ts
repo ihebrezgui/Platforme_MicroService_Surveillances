@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
   template: `
     <!-- Notification Bell Icon with Badge -->
     <div class="notification-bell" (click)="toggleDropdown()">
-      <i class="fas fa-bell"></i>
+      <i class="pi pi-bell"></i>
       <span *ngIf="unreadCount > 0" class="notification-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
     </div>
 
@@ -20,17 +20,17 @@ import { Subscription } from 'rxjs';
         <h3>Notifications</h3>
         <div class="notification-actions">
           <button (click)="markAllAsRead()" class="btn-mark-all">
-            <i class="fas fa-check-double"></i>
+            <i class="pi pi-check"></i>
           </button>
           <button (click)="clearAll()" class="btn-clear-all">
-            <i class="fas fa-trash"></i>
+            <i class="pi pi-trash"></i>
           </button>
         </div>
       </div>
 
       <div class="notification-list">
         <div *ngIf="notifications.length === 0" class="no-notifications">
-          <i class="fas fa-bell-slash"></i>
+          <i class="pi pi-bell-slash"></i>
           <p>Aucune notification</p>
         </div>
 
@@ -50,7 +50,7 @@ import { Subscription } from 'rxjs';
           </div>
           <div class="notification-actions">
             <button (click)="removeNotification(notification.id); $event.stopPropagation()" class="btn-remove">
-              <i class="fas fa-times"></i>
+              <i class="pi pi-times"></i>
             </button>
           </div>
         </div>
@@ -70,7 +70,7 @@ import { Subscription } from 'rxjs';
         </div>
         <div class="toast-message">{{ toast.message }}</div>
         <button (click)="removeToast(toast.id)" class="toast-close">
-          <i class="fas fa-times"></i>
+          <i class="pi pi-times"></i>
         </button>
       </div>
     </div>
@@ -85,19 +85,19 @@ import { Subscription } from 'rxjs';
     }
 
     .notification-bell:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: var(--bg-hover);
     }
 
     .notification-bell i {
       font-size: 1.2rem;
-      color: #fff;
+      color: var(--primary-color);
     }
 
     .notification-badge {
       position: absolute;
       top: 0;
       right: 0;
-      background-color: #ff4757;
+      background-color: var(--primary-color);
       color: white;
       border-radius: 50%;
       padding: 2px 6px;

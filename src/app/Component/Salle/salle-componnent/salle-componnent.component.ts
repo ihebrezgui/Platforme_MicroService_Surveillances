@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { SalleService, ReservationSalle } from '../../../Service/salle-service.service';
 import { EnseignantService } from '../../../Service/enseignant-service.service';
 import { CommonModule, NgFor } from '@angular/common';
@@ -8,7 +8,7 @@ import { EmploiDuTemps, EmploiDuTempsService } from '../../../Service/emploi-du-
 @Component({
   selector: 'app-salle-componnent',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, NgFor],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgFor],
   templateUrl: './salle-componnent.component.html',
   styleUrls: ['./salle-componnent.component.scss']
 })
@@ -35,8 +35,20 @@ export class SalleComponnentComponent implements OnInit{
 
   // Modal Disponibilités
   isDisponibilitesModalOpen = false;
-disponibilites: EmploiDuTemps[] = [];
+  disponibilites: EmploiDuTemps[] = [];
   disponibilitesError: string | null = null;
+
+  // Import section
+  showImportSection = false;
+
+  // Search and filter properties
+  searchTerm: string = '';
+  filteredSalles: any[] = [];
+
+  // Import validation properties
+  showImportValidationModal = false;
+  importValidationData: {duplicates: any[], newSalles: any[]} | null = null;
+  pendingImportFile: File | null = null;
 
   constructor(
     private salleService: SalleService,
@@ -60,7 +72,10 @@ disponibilites: EmploiDuTemps[] = [];
 
   private loadSalles(): void {
     this.salleService.getSallesWithStatus().subscribe({
-      next: (data) => (this.salles = data),
+      next: (data) => {
+        this.salles = data;
+        this.filteredSalles = [...this.salles]; // Initialize filtered data
+      },
       error: (err) => console.error('Erreur chargement salles avec status', err),
     });
   }
@@ -202,19 +217,127 @@ onFileSelected(event: any): void {
 uploadFile(): void {
   if (!this.selectedFile) return;
 
+  // Simuler la lecture du fichier Excel pour obtenir les données
+  // En réalité, vous devriez parser le fichier Excel côté frontend
+  // ou avoir un endpoint qui retourne les données parsées
+  this.validateAndImportFile(this.selectedFile);
+}
+
+private validateAndImportFile(file: File): void {
+  // Pour cet exemple, je vais simuler la validation
+  // En production, vous devriez parser le fichier Excel et obtenir les vraies données
+  const reader = new FileReader();
+  reader.onload = (e: any) => {
+    try {
+      // Simulation de données parsées du fichier Excel
+      // En réalité, vous utiliseriez une bibliothèque comme xlsx pour parser le fichier
+      const mockSallesFromFile = [
+        { bloc: 'A', etage: 1, nom: '01', capacite: 30 },
+        { bloc: 'B', etage: 2, nom: '05', capacite: 25 },
+        { bloc: 'A', etage: 1, nom: '01', capacite: 30 }, // Doublon potentiel
+      ];
+
+      // Vérifier les doublons
+      this.salleService.checkDuplicateSalles(mockSallesFromFile).subscribe({
+        next: (validationResult) => {
+          this.importValidationData = validationResult;
+          this.pendingImportFile = file;
+          
+          if (validationResult.duplicates.length > 0) {
+            // Afficher le modal de validation
+            this.showImportValidationModal = true;
+          } else {
+            // Pas de doublons, procéder directement à l'import
+            this.proceedWithImport(file);
+          }
+        },
+        error: (err) => {
+          console.error('Erreur validation doublons:', err);
+          alert('❌ Erreur lors de la validation des doublons');
+        }
+      });
+    } catch (error) {
+      console.error('Erreur lecture fichier:', error);
+      alert('❌ Erreur lors de la lecture du fichier');
+    }
+  };
+  reader.readAsText(file);
+}
+
+private proceedWithImport(file: File): void {
   const formData = new FormData();
-  formData.append('file', this.selectedFile);
+  formData.append('file', file);
 
   this.salleService.importSallesFromExcel(formData).subscribe({
     next: (res) => {
       alert('✅ Importation réussie !');
       this.loadSalles(); // Recharger la liste
       this.selectedFile = null;
+      this.closeImportValidationModal();
     },
     error: (err) => {
       console.error(err);
       alert('❌ Échec importation');
     }
+  });
+}
+
+// ==== Import Validation Modal ====
+closeImportValidationModal(): void {
+  this.showImportValidationModal = false;
+  this.importValidationData = null;
+  this.pendingImportFile = null;
+}
+
+confirmImportWithDuplicates(): void {
+  if (this.pendingImportFile) {
+    this.proceedWithImport(this.pendingImportFile);
+  }
+}
+
+importOnlyNewSalles(): void {
+  if (this.pendingImportFile && this.importValidationData) {
+    // Créer un nouveau fichier avec seulement les nouvelles salles
+    // En production, vous devriez modifier le fichier ou envoyer seulement les nouvelles données
+    alert('⚠️ Fonctionnalité à implémenter : import des nouvelles salles uniquement');
+    this.closeImportValidationModal();
+  }
+}
+
+// ==== Import Section ====
+toggleImportSection(): void {
+  this.showImportSection = !this.showImportSection;
+}
+
+// ==== Search and Filter Methods ====
+onSearchChange(): void {
+  this.applySearch();
+}
+
+clearSearch(): void {
+  this.searchTerm = '';
+  this.applySearch();
+}
+
+applySearch(): void {
+  if (!this.searchTerm.trim()) {
+    this.filteredSalles = [...this.salles];
+    return;
+  }
+
+  const term = this.searchTerm.toLowerCase().trim();
+  this.filteredSalles = this.salles.filter(salle => {
+    const nomComplet = `${salle.bloc}${salle.etage}${salle.nom}`.toLowerCase();
+    const nom = salle.nom.toLowerCase();
+    const bloc = salle.bloc.toLowerCase();
+    const capacite = salle.capacite.toString();
+    const etage = salle.etage.toString();
+
+    return nomComplet.includes(term) ||
+           nom.includes(term) ||
+           bloc.includes(term) ||
+           capacite.includes(term) ||
+           etage.includes(term);
   });
 }
 

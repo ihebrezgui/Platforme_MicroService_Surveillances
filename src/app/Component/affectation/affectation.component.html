@@ -1,98 +1,257 @@
-<div class="affectation-container">
-  <h2>🧩 Affecter Module à des Groupes</h2>
+<div class="container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-info">
+      <h2>🧩 Affectation Module-Classe</h2>
+      <div class="affectation-count">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        {{ affectations.length }} affectation(s) au total
+      </div>
+    </div>
+  </div>
 
-  <form (ngSubmit)="affecter()" class="form-section" novalidate>
-    <!-- Module -->
-    <div>
-      <label for="moduleSelect">Module</label>
-      <select id="moduleSelect" [(ngModel)]="selectedModuleId" name="module" required>
+  <!-- Form Section -->
+  <div class="form-section">
+    <div class="form-container">
+      <div class="form-header">
+        <h3>📝 Nouvelle Affectation</h3>
+        <p>Assignez un module à des classes pour une période donnée</p>
+      </div>
+      
+      <form (ngSubmit)="affecter()" class="affectation-form" novalidate>
+        <!-- First Row: Module and Period -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="moduleSelect">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+              Module à assigner *
+            </label>
+            <select id="moduleSelect" [(ngModel)]="selectedModuleId" name="module" required class="form-control">
               <option value="" disabled selected>-- Choisir un module --</option>
-        <option *ngFor="let module of modules" [value]="module.id">
-          {{ module.libelleModule }}
-        </option>
-      </select>
-    </div>
+              <option *ngFor="let module of modules" [value]="module.id">
+                {{ module.libelleModule }}
+              </option>
+            </select>
+            <div class="form-help" *ngIf="selectedModuleId">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Module sélectionné: {{ getSelectedModuleName() }}
+            </div>
+          </div>
 
-    <!-- Option Groupe -->
-    <div>
-      <label for="optionSelect">Option</label>
-     <select
-  [(ngModel)]="selectedOptionGroupe"
-  (change)="onOptionGroupeChange($event)"
-  name="optionGroupe"
-  required
->
-  <option *ngFor="let option of optionsGroupe" [value]="option">{{ option }}</option>
-</select>
+          <div class="form-group">
+            <label for="periodeSelect">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Période académique *
+            </label>
+            <select id="periodeSelect" [(ngModel)]="selectedPeriode" name="periode" required class="form-control">
+              <option *ngFor="let p of periodes" [value]="p">{{ getPeriodeDisplayName(p) }}</option>
+            </select>
+          </div>
+        </div>
 
-    </div>
+        <!-- Second Row: Class Filter -->
+        <div class="form-group">
+          <label for="optionSelect">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            Filtrer par option de classe
+          </label>
+          <select
+            id="optionSelect"
+            [(ngModel)]="selectedOptionGroupe"
+            (change)="onOptionGroupeChange($event)"
+            name="optionGroupe"
+            class="form-control"
+          >
+            <option value="" disabled>-- Toutes les options --</option>
+            <option *ngFor="let option of optionsGroupe" [value]="option">{{ option }}</option>
+          </select>
+          <div class="form-help" *ngIf="selectedOptionGroupe">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            {{ filteredGroupes.length }} classe(s) trouvée(s) pour l'option {{ selectedOptionGroupe }}
+          </div>
+        </div>
 
-    <!-- Groupes filtrés par option -->
-    <div class="full-width">
-     <label for="groupesSelect">Groupes (sélection multiple possible)</label>
-<select
-  id="groupesSelect"
-  multiple
-  [(ngModel)]="selectedGroupeIds"
-  name="groupes"
-  required
-  size="6"
->
-  <option *ngFor="let g of filteredGroupes" [value]="g.id">
-    {{ getDisplayClassName(g) }} — Niveau: {{ g.niveau }} — Effectif: {{ g.effectif }} — Département: {{ g.departement }}
-  </option>
-</select>
+        <!-- Third Row: Class Selection -->
+        <div class="form-group">
+          <label for="groupesSelect">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Classes à assigner (sélection multiple) *
+          </label>
+          <div class="classes-selection-container">
+            <select
+              id="groupesSelect"
+              multiple
+              [(ngModel)]="selectedGroupeIds"
+              name="groupes"
+              required
+              size="6"
+              class="form-control classes-select"
+            >
+              <option *ngFor="let g of filteredGroupes" [value]="g.id">
+                {{ getDisplayClassName(g) }} — Niveau: {{ g.niveau }} — Effectif: {{ g.effectif }} — Département: {{ g.departement }}
+              </option>
+            </select>
+            <div class="selection-info">
+              <div class="selection-count">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                {{ selectedGroupeIds.length }} classe(s) sélectionnée(s)
+              </div>
+              <div class="selection-actions">
+                <button type="button" class="btn btn-sm btn-success" (click)="selectAllClasses()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                  </svg>
+                  Tout sélectionner
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary" (click)="clearSelection()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  Effacer
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="form-help">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            Maintenez Ctrl (Cmd sur Mac) pour sélectionner plusieurs classes
+          </div>
+        </div>
 
-    </div>
-
-    <!-- Période -->
-    <div>
-      <label for="periodeSelect">Période</label>
-      <select id="periodeSelect" [(ngModel)]="selectedPeriode" name="periode" required>
-        <option *ngFor="let p of periodes" [value]="p">{{ p }}</option>
-      </select>
-    </div>
-
-    <div></div> <!-- vide pour garder grille alignée -->
-
-    <button type="submit" class="btn-affecter" aria-label="Affecter le module aux groupes">
-      ✅ Affecter
-    </button>
-  </form>
-
-  <hr />
-
-  <h3>📋 Liste des Affectations</h3>
-  <table class="table" aria-label="Liste des affectations">
-    <thead>
-      <tr>
-        <th>Module</th>
-        <th>Groupe</th>
-        <th>Période</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let aff of affectations">
-        <td>{{ aff.module.libelleModule }}</td>
-        <td>
-  {{ getDisplayClassName(aff.groupe) }}
-  <br />
-  <small *ngIf="aff.groupe.niveau">
-    Niveau: {{ aff.groupe.niveau }} |
-    Option: {{ aff.groupe.optionGroupe }} |
-    Effectif: {{ aff.groupe.effectif }} |
-    Département: {{ aff.groupe.departement }}
-  </small>
-</td>
-
-        <td>{{ aff.periode }}</td>
-        <td>
-          <button (click)="deleteAffectation(aff.id)" aria-label="Supprimer l'affectation">
-            ❌ Supprimer
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="!isFormValid() || isLoading">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span *ngIf="!isLoading">✅ Affecter le Module</span>
+            <span *ngIf="isLoading">En cours...</span>
           </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="table-container">
+    <div class="table-header">
+      <h3>📋 Liste des Affectations</h3>
+      <div class="table-info">
+        {{ affectations.length }} affectation(s) enregistrée(s)
+      </div>
+    </div>
+    
+    <div class="table-wrapper" *ngIf="affectations.length > 0">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+              Module
+            </th>
+            <th>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              Classe
+            </th>
+            <th>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Période
+            </th>
+            <th>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Action
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let aff of affectations">
+            <td>
+              <div class="user-info">
+                <div class="user-details">
+                  <div class="username">{{ aff.module.libelleModule }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="user-info">
+                <div class="user-details">
+                  <div class="username">{{ getDisplayClassName(aff.groupe) }}</div>
+                  <div class="user-id" *ngIf="aff.groupe.niveau">
+                    {{ aff.groupe.niveau }} | {{ aff.groupe.optionGroupe }} | {{ aff.groupe.effectif }} étudiants
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="role-badge">{{ getPeriodeDisplayName(aff.periode) }}</span>
+            </td>
+            <td>
+              <div class="action-icons">
+                <button class="icon-btn icon-delete" (click)="deleteAffectation(aff.id)" title="Supprimer l'affectation">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  <span class="btn-text">Supprimer</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="affectations.length === 0">
+      <div class="empty-icon">📭</div>
+      <h3>Aucune affectation</h3>
+      <p>Commencez par affecter un module à des classes</p>
+    </div>
+  </div>
 </div>

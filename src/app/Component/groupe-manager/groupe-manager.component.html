@@ -1,160 +1,288 @@
-<div class="groupe-container">
-  <div class="header">
-    <h2>📚 Gestion des Groupes</h2>
-    <button class="btn-add" (click)="openAddForm()">
-      <i class="plus-icon">+</i> Ajouter Classe
+<div class="container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-info">
+      <h2>Gestion des Groupes</h2>
+      <div class="groupe-count">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        {{ groupes.length }} groupe(s) au total
+      </div>
+    </div>
+    <button class="btn btn-primary" (click)="openAddForm()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14m-7-7h14"/>
+      </svg>
+      Ajouter un groupe
     </button>
   </div>
 
-  <!-- Modal Form -->
-  <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>{{ isEditing ? '✏️ Modifier Classe' : '➕ Ajouter Nouvelle Classe' }}</h3>
-        <button class="close-btn" (click)="closeForm()">&times;</button>
+  <!-- Filter Dropdown Section -->
+  <div class="filter-section">
+    <div class="filter-container">
+      <!-- Search Input -->
+      <div class="search-dropdown">
+        <label for="searchInput">Rechercher :</label>
+        <div class="search-input-wrapper">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input 
+            id="searchInput"
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            (input)="onSearchChange()"
+            placeholder="Rechercher par nom de classe, niveau ou département..."
+            class="search-input"
+          />
+          <button 
+            *ngIf="searchTerm" 
+            (click)="clearSearch()" 
+            class="clear-search-btn"
+            title="Effacer la recherche"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
       </div>
-      
-      <form (ngSubmit)="saveGroupe()" class="form-grid">
-        <div class="form-group">
-          <label for="niveau">Niveau</label>
-          <input 
-            id="niveau"
-            type="text" 
-            placeholder="Ex: 4" 
-            [(ngModel)]="groupeForm.niveau" 
-            name="niveau" 
-            required 
-          />
-        </div>
 
-        <div class="form-group">
-          <label for="option">Option</label>
-          <input 
-            id="option"
-            type="text" 
-            placeholder="Ex: SEA" 
-            [(ngModel)]="groupeForm.optionGroupe" 
-            name="optionGroupe" 
-            required 
-          />
-        </div>
+      <!-- Option Filter Dropdown -->
+      <div class="filter-dropdown">
+        <label for="optionFilter">Filtrer par option :</label>
+        <select 
+          id="optionFilter"
+          [(ngModel)]="optionFilter" 
+          (ngModelChange)="onOptionFilterChange($event)"
+          class="filter-select"
+        >
+          <option value="all">Toutes les options ({{ groupes.length }})</option>
+          <option 
+            *ngFor="let option of optionKeys" 
+            [value]="option"
+          >
+            {{ option }} ({{ groupedGroupes[option].length }})
+          </option>
+        </select>
+      </div>
 
-        <div class="form-group">
-          <label for="numClasse">Numéro de Classe</label>
-          <input 
-            id="numClasse"
-            type="text" 
-            placeholder="Ex: 11" 
-            [(ngModel)]="groupeForm.nomClasse" 
-            name="nomClasse" 
-            required 
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="effectif">Effectif</label>
-          <input 
-            id="effectif"
-            type="number" 
-            placeholder="Nombre d'étudiants" 
-            [(ngModel)]="groupeForm.effectif" 
-            name="effectif" 
-            required 
-          />
-        </div>
-
-        <div class="form-group full-width">
-          <label for="departement">Département</label>
-          <input 
-            id="departement"
-            type="text" 
-            placeholder="Ex: Informatique" 
-            [(ngModel)]="groupeForm.departement" 
-            name="departement" 
-            required 
-          />
-        </div>
-
-        <!-- Preview -->
-        <div class="preview-section full-width" *ngIf="groupeForm.niveau && groupeForm.optionGroupe && groupeForm.nomClasse">
-          <label>Aperçu du nom de classe:</label>
-          <div class="preview-name">{{ groupeForm.niveau }}{{ groupeForm.optionGroupe }}{{ groupeForm.nomClasse }}</div>
-        </div>
-
-        <div class="form-actions full-width">
-          <button type="submit" class="btn-save">
-            {{ isEditing ? '💾 Modifier' : '✅ Ajouter' }}
-          </button>
-          <button type="button" class="btn-cancel" (click)="closeForm()">
-            ❌ Annuler
-          </button>
-        </div>
-      </form>
+      <!-- Clear Filters Button -->
+      <button 
+        *ngIf="searchTerm || optionFilter !== 'all'"
+        (click)="clearAllFilters()" 
+        class="clear-filters-btn"
+        title="Effacer tous les filtres"
+      >
+        Effacer les filtres
+      </button>
     </div>
+
+    <!-- Search Results Info -->
+    <div class="search-info" *ngIf="searchTerm || optionFilter !== 'all'">
+      <span *ngIf="filteredGroupes.length !== groupes.length">
+        {{ filteredGroupes.length }} résultat(s) trouvé(s) sur {{ groupes.length }} groupe(s)
+      </span>
+      <span *ngIf="filteredGroupes.length === 0">
+        Aucun résultat trouvé
+      </span>
+    </div>
+  </div>
+
+  <!-- Modal Form -->
+  <div class="modal-backdrop" *ngIf="showForm" (click)="closeForm()"></div>
+  <div class="modal" *ngIf="showForm" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <h3 id="modalTitle">{{ isEditing ? 'Modifier Groupe' : 'Ajouter Nouveau Groupe' }}</h3>
+      <button class="close-btn" (click)="closeForm()" aria-label="Fermer">&times;</button>
+    </div>
+    
+    <form (ngSubmit)="saveGroupe()" class="modal-body">
+      <div class="form-group">
+        <label for="niveau">Niveau</label>
+        <input 
+          id="niveau"
+          type="text" 
+          placeholder="Ex: 4" 
+          [(ngModel)]="groupeForm.niveau" 
+          name="niveau" 
+          required 
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="option">Option</label>
+        <input 
+          id="option"
+          type="text" 
+          placeholder="Ex: SEA" 
+          [(ngModel)]="groupeForm.optionGroupe" 
+          name="optionGroupe" 
+          required 
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="numClasse">Numéro de Classe</label>
+        <input 
+          id="numClasse"
+          type="text" 
+          placeholder="Ex: 11" 
+          [(ngModel)]="groupeForm.nomClasse" 
+          name="nomClasse" 
+          required 
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="effectif">Effectif</label>
+        <input 
+          id="effectif"
+          type="number" 
+          placeholder="Nombre d'étudiants" 
+          [(ngModel)]="groupeForm.effectif" 
+          name="effectif" 
+          required 
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="departement">Département</label>
+        <input 
+          id="departement"
+          type="text" 
+          placeholder="Ex: Informatique" 
+          [(ngModel)]="groupeForm.departement" 
+          name="departement" 
+          required 
+          class="form-control"
+        />
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-section" *ngIf="groupeForm.niveau && groupeForm.optionGroupe && groupeForm.nomClasse">
+        <label>Aperçu du nom de classe:</label>
+        <div class="preview-name">{{ groupeForm.niveau }}{{ groupeForm.optionGroupe }}{{ groupeForm.nomClasse }}</div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          {{ isEditing ? 'Modifier' : 'Ajouter' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="closeForm()">
+          Annuler
+        </button>
+      </div>
+    </form>
   </div>
 
   <!-- Groupes by Option -->
   <div class="table-container">
-    <div class="grid-header">
-      <h3>📋 Classes par Option ({{ groupes.length }} total)</h3>
+    <!-- Loading State -->
+    <div *ngIf="false" class="loading">
+      <div class="spinner"></div>
+      <p>Chargement des groupes...</p>
     </div>
 
-    <div class="options-container" *ngIf="groupes.length > 0">
-      <div 
-        *ngFor="let option of optionKeys" 
-        class="option-group">
-        
-        <!-- Option Header -->
-        <div class="option-header" (click)="toggleGroup(option)">
-          <div class="option-info">
-            <div class="option-icon">🎯</div>
-            <div class="option-details">
-              <h4 class="option-name">{{ option }}</h4>
-              <p class="option-count">{{ groupedGroupes[option].length }} classe(s)</p>
-            </div>
-          </div>
-          <div class="expand-icon" [class.expanded]="isGroupExpanded(option)">
-            ▼
-          </div>
-        </div>
+    <!-- Empty State -->
+    <div *ngIf="groupes.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <h3>Aucun groupe trouvé</h3>
+      <p>Commencez par créer votre premier groupe pour organiser vos classes.</p>
+      <button class="btn btn-primary" (click)="openAddForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14m-7-7h14"/>
+        </svg>
+        Ajouter un groupe
+      </button>
+    </div>
 
-        <!-- Classes in this option -->
-        <div class="groupes-list" [class.expanded]="isGroupExpanded(option)">
-          <div 
-            *ngFor="let groupe of groupedGroupes[option]; trackBy: trackByGroupeId" 
-            class="groupe-card">
-            <div class="groupe-info">
-              <div class="classe-icon">📚</div>
-              <div class="groupe-details">
-                <h4 class="classe-name">{{ getDisplayClassName(groupe) }}</h4>
-                <div class="classe-meta">
-                  <span class="niveau-badge">Niveau {{ groupe.niveau }}</span>
-                  <span class="effectif-badge">{{ groupe.effectif }} étudiants</span>
-                </div>
-                <p class="departement">{{ groupe.departement }}</p>
+    <!-- Groupes Content -->
+    <div *ngIf="groupes.length > 0" class="groupes-content">
+      <div class="grid-header">
+        <h3>Classes par Option ({{ filteredGroupes.length }} affiché(s) sur {{ groupes.length }} total)</h3>
+      </div>
+
+      <div class="options-container">
+        <div 
+          *ngFor="let option of filteredOptionKeys" 
+          class="option-group">
+          
+          <!-- Option Header -->
+          <div class="option-header" (click)="toggleGroup(option)">
+            <div class="option-info">
+              <div class="option-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
+              <div class="option-details">
+                <h4 class="option-name">{{ option }}</h4>
+                <p class="option-count">{{ getFilteredGroupesForOption(option).length }} classe(s)</p>
               </div>
             </div>
-            <div class="groupe-actions">
-              <button class="btn-edit" (click)="editGroupe(groupe)" title="Modifier">
-                ✏️
-              </button>
-              <button class="btn-delete" (click)="deleteGroupe(groupe.id!)" title="Supprimer">
-                🗑️
-              </button>
+            <div class="expand-icon" [class.expanded]="isGroupExpanded(option)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6,9 12,15 18,9"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Classes in this option -->
+          <div class="groupes-list" [class.expanded]="isGroupExpanded(option)">
+            <div 
+              *ngFor="let groupe of getFilteredGroupesForOption(option); trackBy: trackByGroupeId" 
+              class="groupe-card">
+              <div class="groupe-info">
+                <div class="groupe-avatar">{{ getDisplayClassName(groupe).charAt(0) }}</div>
+                <div class="groupe-details">
+                  <h4 class="groupe-name">{{ getDisplayClassName(groupe) }}</h4>
+                  <div class="groupe-meta">
+                    <span class="niveau-badge">Niveau {{ groupe.niveau }}</span>
+                    <span class="effectif-badge">{{ groupe.effectif }} étudiants</span>
+                  </div>
+                  <p class="departement">{{ groupe.departement }}</p>
+                </div>
+              </div>
+              <div class="groupe-actions">
+                <button class="icon-btn icon-edit" (click)="editGroupe(groupe)" title="Modifier">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  <span class="btn-text">Modifier</span>
+                </button>
+                <button class="icon-btn icon-delete" (click)="deleteGroupe(groupe.id!)" title="Supprimer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3,6 5,6 21,6"/>
+                    <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"/>
+                    <line x1="10" y1="11" x2="10" y2="17"/>
+                    <line x1="14" y1="11" x2="14" y2="17"/>
+                  </svg>
+                  <span class="btn-text">Supprimer</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Empty State -->
-    <div class="empty-state" *ngIf="groupes.length === 0">
-      <div class="empty-icon">📭</div>
-      <h3>Aucune classe disponible</h3>
-      <p>Commencez par créer votre première classe</p>
-      <button class="btn-create-first" (click)="openAddForm()">
-        ✨ Créer la première classe
-      </button>
     </div>
   </div>
 </div>

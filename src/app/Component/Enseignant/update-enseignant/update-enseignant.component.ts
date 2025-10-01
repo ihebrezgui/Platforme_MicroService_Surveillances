@@ -26,8 +26,10 @@ export class UpdateEnseignantComponent implements OnInit {
     grade: null as any,
       unitePedagogique: undefined, // <-- ici
   };
+  isSubmitting: boolean = false;
 
   gradeOptions: string[] = ['CUP', 'EFA', 'EF', 'CHEFDEP'];
+  statutOptions: string[] = ['PERMANENT', 'VACATAIRE'];
   unitePedagogiques: UnitePedagogique[] = [];
 selectedUnitePedagogiqueId: number = 0; // valeur par défaut = 0 (ou un id valide)
 
@@ -78,26 +80,42 @@ selectedUnitePedagogiqueId: number = 0; // valeur par défaut = 0 (ou un id vali
 
   onSubmit(form: NgForm) {
     if (form.valid && !this.matriculeInvalide) {
+      this.isSubmitting = true;
+      
       this.enseignantService
         .updateEnseignant(this.enseignant.id!, this.enseignant)
         .subscribe({
           next: () => {
             this.successMessage = 'Enseignant mis à jour avec succès';
             this.errorMessage = '';
-            Swal.fire('Succès', this.successMessage, 'success');
+            Swal.fire({
+              icon: 'success',
+              title: 'Succès!',
+              text: this.successMessage,
+              confirmButtonColor: '#2563eb'
+            });
             this.router.navigate(['/enseignants']);
           },
           error: (err) => {
             this.errorMessage = err.error?.message || "Erreur lors de la mise à jour";
-            Swal.fire('Erreur', this.errorMessage, 'error');
+            Swal.fire({
+              icon: 'error',
+              title: 'Erreur!',
+              text: this.errorMessage,
+              confirmButtonColor: '#ef4444'
+            });
           },
+          complete: () => {
+            this.isSubmitting = false;
+          }
         });
     } else {
-      Swal.fire(
-        'Champs invalides',
-        'Veuillez remplir correctement tous les champs.',
-        'warning'
-      );
+      Swal.fire({
+        icon: 'warning',
+        title: 'Champs invalides',
+        text: 'Veuillez remplir correctement tous les champs.',
+        confirmButtonColor: '#f59e0b'
+      });
     }
   }
 ngOnInit() {
@@ -128,7 +146,7 @@ this.selectedUnitePedagogiqueId = ens.unitePedagogique ? ens.unitePedagogique.id
   });
 }
 
-onUniteChange(event: Event): void {
+  onUniteChange(event: Event): void {
   const selectElement = event.target as HTMLSelectElement;
   const selectedValue = Number(selectElement.value);
   console.log('✅ Changement unité sélectionnée :', selectedValue);
@@ -155,5 +173,8 @@ onUniteChange(event: Event): void {
   console.log('✅ État après modification:', this.enseignant.unitePedagogique);
 }
 
+  navigateToEnseignants(): void {
+    this.router.navigate(['/enseignants']);
+  }
 
 }

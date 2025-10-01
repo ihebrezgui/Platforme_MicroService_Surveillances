@@ -92,6 +92,32 @@ importSallesFromExcel(formData: FormData) {
     responseType: 'text' // <== AJOUTER CECI
   });
 }
+
+// Méthode pour vérifier les doublons avant import
+checkDuplicateSalles(sallesToCheck: any[]): Observable<{duplicates: any[], newSalles: any[]}> {
+  return this.getAllSalles().pipe(
+    map(existingSalles => {
+      const duplicates: any[] = [];
+      const newSalles: any[] = [];
+
+      sallesToCheck.forEach(salleToCheck => {
+        const isDuplicate = existingSalles.some(existingSalle => 
+          existingSalle.bloc === salleToCheck.bloc &&
+          existingSalle.etage === salleToCheck.etage &&
+          existingSalle.nom === salleToCheck.nom
+        );
+
+        if (isDuplicate) {
+          duplicates.push(salleToCheck);
+        } else {
+          newSalles.push(salleToCheck);
+        }
+      });
+
+      return { duplicates, newSalles };
+    })
+  );
+}
 // Dans salle-service.service.ts
 getSallesByIds(ids: number[]): Observable<Salle[]> {
   if (!ids || ids.length === 0) {

@@ -1,75 +1,288 @@
+// Variables
+$primary-color: #2563eb;
+$primary-hover: #1d4ed8;
+$success-color: #10b981;
+$success-hover: #059669;
+$danger-color: #ef4444;
+$danger-hover: #dc2626;
+$warning-color: #f59e0b;
+$warning-hover: #d97706;
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-400: #9ca3af;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #111827;
+$border-radius: 8px;
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$transition: all 0.2s ease-in-out;
+
+// ESPRIT Colors
+$esprit-red: #dc3545;
+$esprit-red-hover: #c82333;
+$esprit-white: #FCFCFC;
+$esprit-black: #080808;
+$esprit-light-gray: #C0B8B9;
+$esprit-dark-gray: #727272;
+
 .update-user-container {
-  max-width: 500px;
-  margin: 50px auto;
-  padding: 30px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: $gray-50;
+  margin-top: -4.2rem; 
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
-  h2 {
-    text-align: center;
-    margin-bottom: 25px;
-    color: #333;
+// Header section
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: $border-radius;
+  box-shadow: $shadow-sm;
+  border: 1px solid $gray-200;
+
+  .header-content {
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: $gray-900;
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      &::before {
+        content: '👤';
+        font-size: 1.5rem;
+      }
+
+      svg {
+        color: $primary-color;
+      }
+    }
+
+    .header-description {
+      color: $gray-600;
+      font-size: 0.875rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+}
+
+// Form container
+.form-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: $border-radius;
+  box-shadow: $shadow-sm;
+  border: 1px solid $gray-200;
+
+  .update-form {
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+
+    .form-group {
+      .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: $gray-700;
+        margin-bottom: 0.5rem;
+
+        svg {
+          color: $gray-500;
+          flex-shrink: 0;
+        }
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid $gray-200;
+        border-radius: $border-radius;
+        font-size: 0.875rem;
+        transition: $transition;
+        background: white;
+        color: $gray-900;
+
+        &::placeholder {
+          color: $gray-400;
+        }
+
+                 &:focus {
+           outline: none;
+           border-color: $esprit-red;
+           box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+         }
+
+        &:hover:not(:focus) {
+          border-color: $gray-300;
+        }
+
+        &.form-select {
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+          background-position: right 0.75rem center;
+          background-repeat: no-repeat;
+          background-size: 1.5em 1.5em;
+          padding-right: 2.5rem;
+        }
+      }
+
+      .error-message {
+        color: $danger-color;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        &::before {
+          content: '⚠';
+          font-size: 0.875rem;
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      padding-top: 1.5rem;
+      border-top: 1px solid $gray-200;
+
+      @media (max-width: 768px) {
+        flex-direction: column-reverse;
+        gap: 0.75rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: $border-radius;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: $transition;
+        box-shadow: $shadow-sm;
+        min-width: 140px;
+        justify-content: center;
+
+                 &:focus {
+           outline: none;
+           box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+         }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none !important;
+        }
+
+        svg {
+          width: 16px;
+          height: 16px;
+          flex-shrink: 0;
+        }
+
+                 // Primary button
+         &.btn-primary {
+           background-color: $esprit-red;
+           color: white;
+
+           &:hover:not(:disabled) {
+             background-color: $esprit-red-hover;
+             transform: translateY(-1px);
+             box-shadow: $shadow-md;
+           }
+
+           &:focus {
+             box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+           }
+
+           .spinner {
+             width: 16px;
+             height: 16px;
+             border: 2px solid transparent;
+             border-top: 2px solid currentColor;
+             border-radius: 50%;
+             animation: spin 1s linear infinite;
+           }
+         }
+
+                 // Secondary button
+         &.btn-secondary {
+           background-color: white;
+           color: $esprit-dark-gray;
+           border: 2px solid $esprit-light-gray;
+
+           &:hover:not(:disabled) {
+             background-color: $gray-50;
+             border-color: $esprit-dark-gray;
+             transform: translateY(-1px);
+             box-shadow: $shadow-md;
+           }
+
+           &:focus {
+             box-shadow: 0 0 0 3px rgba(192, 184, 185, 0.3);
+           }
+         }
+      }
+    }
+  }
+}
+
+// Loading spinner animation
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive design
+@media (max-width: 640px) {
+  .update-user-container {
+    padding: 1rem;
   }
 
-  .form-group {
-    margin-bottom: 20px;
+  .header-section {
+    padding: 1.5rem;
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #444;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-      transition: border-color 0.3s;
-
-      &:focus {
-        border-color: #007bff;
-        outline: none;
+    .header-content {
+      h2 {
+        font-size: 1.5rem;
       }
-    }
-
-    select.form-control {
-      appearance: none;
-      background: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='14' height='10' viewBox='0 0 14 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23333' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E")
-        no-repeat right 10px center;
-      background-size: 12px;
     }
   }
 
-  .btn {
-    width: 48%;
-    padding: 10px;
-    font-weight: 600;
-    border-radius: 6px;
-    margin-top: 15px;
-
-    &.btn-primary {
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-
-      &:hover {
-        background-color: #0056b3;
-      }
-    }
-
-    &.btn-secondary {
-      background-color: #6c757d;
-      color: #fff;
-      border: none;
-      margin-left: 4%;
-
-      &:hover {
-        background-color: #5a6268;
-      }
-    }
+  .form-container {
+    padding: 1.5rem;
   }
 }

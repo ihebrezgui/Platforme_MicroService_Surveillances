@@ -1,31 +1,130 @@
 <div class="update-user-container">
-  <h2>Modifier l'utilisateur</h2>
-
-  <form [formGroup]="updateUserForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="nom">Nom :</label>
-      <input id="nom" type="text" formControlName="nom" class="form-control" />
+  <div class="header-section">
+    <div class="header-content">
+      <h2>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        Modifier l'utilisateur
+      </h2>
+      <p class="header-description">Mettez à jour les informations de l'utilisateur</p>
     </div>
+  </div>
 
-    <div class="form-group">
-      <label for="email">Email :</label>
-      <input id="email" type="email" formControlName="email" class="form-control" />
-    </div>
+  <div class="form-container">
+    <form [formGroup]="updateUserForm" (ngSubmit)="onSubmit()" class="update-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="username" class="form-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Nom complet
+          </label>
+          <input 
+            id="username" 
+            type="text" 
+            formControlName="username" 
+            class="form-control" 
+            placeholder="Entrez le nom complet"
+          />
+          <div *ngIf="updateUserForm.get('username')?.invalid && updateUserForm.get('username')?.touched" class="error-message">
+            Le nom est requis
+          </div>
+        </div>
 
-    <div class="form-group">
-      <label for="matricule">Matricule :</label>
-      <input id="matricule" type="text" formControlName="matricule" class="form-control" />
-    </div>
+        <div class="form-group">
+          <label for="email" class="form-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            Adresse email
+          </label>
+          <input 
+            id="email" 
+            type="email" 
+            formControlName="email" 
+            class="form-control" 
+            placeholder="exemple@email.com"
+          />
+          <div *ngIf="updateUserForm.get('email')?.invalid && updateUserForm.get('email')?.touched" class="error-message">
+            Veuillez entrer une adresse email valide
+          </div>
+        </div>
+      </div>
 
-    <div class="form-group">
-      <label for="role">Rôle :</label>
-      <select id="role" formControlName="role" class="form-control">
-        <option value="ADMIN">ADMIN</option>
-        <option value="ENSEIGNANT">ENSEIGNANT</option>
-      </select>
-    </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="matricule" class="form-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Matricule
+          </label>
+          <input 
+            id="matricule" 
+            type="text" 
+            formControlName="matricule" 
+            class="form-control" 
+            placeholder="Entrez le matricule"
+          />
+          <div *ngIf="updateUserForm.get('matricule')?.invalid && updateUserForm.get('matricule')?.touched" class="error-message">
+            Le matricule est requis
+          </div>
+        </div>
 
-    <button type="submit" class="btn btn-primary" [disabled]="updateUserForm.invalid">Modifier</button>
-    <button type="button" class="btn btn-secondary" (click)="navigateToUsers()">Annuler</button>
-  </form>
+        <div class="form-group">
+          <label for="role" class="form-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Rôle utilisateur
+          </label>
+          <select id="role" formControlName="role" class="form-control form-select">
+            <option value="" disabled selected>Sélectionnez un rôle</option>
+            <option value="ADMIN">Administrateur</option>
+            <option value="ENSEIGNANT">Enseignant</option>
+          </select>
+          <div *ngIf="updateUserForm.get('role')?.invalid && updateUserForm.get('role')?.touched" class="error-message">
+            Veuillez sélectionner un rôle
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="navigateToUsers()"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12,19 5,12 12,5"/>
+          </svg>
+          Annuler
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary" 
+          [disabled]="updateUserForm.invalid || isSubmitting"
+        >
+          <svg *ngIf="!isSubmitting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22,4 12,14.01 9,11.01"/>
+          </svg>
+          <div *ngIf="isSubmitting" class="spinner"></div>
+          {{ isSubmitting ? 'Modification...' : 'Modifier l\'utilisateur' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

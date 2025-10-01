@@ -22,12 +22,21 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 $transition: all 0.2s ease-in-out;
 
+// ESPRIT Colors
+$esprit-red: #dc3545;
+$esprit-red-hover: #c82333;
+$esprit-white: #FCFCFC;
+$esprit-black: #080808;
+$esprit-light-gray: #C0B8B9;
+$esprit-dark-gray: #727272;
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
   background-color: $gray-50;
   min-height: 100vh;
+  margin-top: -4.2rem; 
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   h2 {
@@ -68,6 +77,169 @@ $transition: all 0.2s ease-in-out;
       color: $gray-600;
       font-size: 0.875rem;
       margin-top: 0.25rem;
+    }
+  }
+}
+
+// Search section
+.search-section {
+  margin-bottom: 1.5rem;
+  
+  .search-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: $border-radius;
+    box-shadow: $shadow-sm;
+    border: 1px solid $gray-200;
+    
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      max-width: 500px;
+      margin-bottom: 1rem;
+      
+      .search-icon {
+        position: absolute;
+        left: 1rem;
+        color: $gray-500;
+        z-index: 1;
+      }
+      
+      .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.75rem;
+        border: 1px solid $gray-300;
+        border-radius: $border-radius;
+        font-size: 0.875rem;
+        transition: $transition;
+        background: white;
+        
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+          box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+        
+        &::placeholder {
+          color: $gray-500;
+        }
+      }
+      
+      .clear-search-btn {
+        position: absolute;
+        right: 0.75rem;
+        background: none;
+        border: none;
+        color: $gray-500;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 50%;
+        transition: $transition;
+        
+        &:hover {
+          background: $gray-100;
+          color: $gray-700;
+        }
+      }
+    }
+    
+    .filter-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      
+      .filter-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $gray-700;
+        white-space: nowrap;
+      }
+      
+      .status-filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        
+        .filter-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          border: 1px solid $gray-300;
+          background: white;
+          color: $gray-700;
+          border-radius: $border-radius;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: $transition;
+          white-space: nowrap;
+          
+          &:hover {
+            background: $gray-50;
+            border-color: $gray-400;
+            transform: translateY(-1px);
+          }
+          
+          &.active {
+            background: $primary-color;
+            color: white;
+            border-color: $primary-color;
+            
+            &:hover {
+              background: $primary-hover;
+              border-color: $primary-hover;
+            }
+          }
+          
+          svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+          }
+        }
+      }
+      
+      .clear-filters-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid $gray-300;
+        background: white;
+        color: $gray-600;
+        border-radius: $border-radius;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: $transition;
+        
+        &:hover {
+          background: $gray-50;
+          border-color: $gray-400;
+          color: $gray-700;
+        }
+        
+        svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+    }
+    
+    .search-info {
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+      color: $gray-600;
+      
+      span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
     }
   }
 }
@@ -179,7 +351,27 @@ $transition: all 0.2s ease-in-out;
   border-radius: $border-radius;
   box-shadow: $shadow-sm;
   border: 1px solid $gray-200;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  
+  // Scrollbar styling
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $esprit-light-gray;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $esprit-red;
+    border-radius: 4px;
+    
+    &:hover {
+      background: $esprit-red-hover;
+    }
+  }
 }
 
 // Modern table styles
@@ -187,9 +379,10 @@ $transition: all 0.2s ease-in-out;
   width: 100%;
   border-collapse: collapse;
   background: white;
+  min-width: 900px; // Force minimum width for horizontal scroll
 
   thead {
-    background: linear-gradient(135deg, $gray-50 0%, $gray-100 100%);
+    background: linear-gradient(135deg, $gray-100 0%, $gray-200 100%);
     
     th {
       padding: 1rem 1.5rem;
@@ -199,18 +392,34 @@ $transition: all 0.2s ease-in-out;
       color: $gray-700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      border-bottom: 2px solid $gray-200;
+      border-bottom: 2px solid $gray-300;
       white-space: nowrap;
+      vertical-align: middle;
+      
+      svg {
+        width: 14px;
+        height: 14px;
+        opacity: 0.7;
+        margin-right: 0.5rem;
+        vertical-align: middle;
+        color: $gray-600;
+      }
     }
   }
 
   tbody {
     tr {
-      border-bottom: 1px solid $gray-100;
+      border-bottom: 1px solid $esprit-light-gray;
       transition: $transition;
 
       &:hover {
-        background-color: $gray-50;
+        background-color: rgba(220, 53, 69, 0.05);
+        transform: translateY(-1px);
+        box-shadow: $shadow-sm;
+      }
+
+      &:nth-child(even) {
+        background-color: rgba(192, 184, 185, 0.03);
       }
 
       &:last-child {
@@ -220,13 +429,13 @@ $transition: all 0.2s ease-in-out;
       td {
         padding: 1.25rem 1.5rem;
         font-size: 0.875rem;
-        color: $gray-900;
+        color: $esprit-black;
         vertical-align: middle;
 
-        &.matricule {
-          font-weight: 600;
-          color: $primary-color;
-        }
+                 &.matricule {
+           font-weight: 600;
+           color: $gray-700;
+         }
       }
     }
   }
@@ -237,45 +446,41 @@ $transition: all 0.2s ease-in-out;
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
+  padding: 0.5rem 0.875rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  transition: $transition;
 
-  &::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+  svg {
+    width: 12px;
+    height: 12px;
   }
 
   &.active {
     background-color: rgba(16, 185, 129, 0.1);
     color: #065f46;
+    border: 1px solid rgba(16, 185, 129, 0.2);
 
-    &::before {
-      background-color: #10b981;
+    svg {
+      color: #10b981;
     }
   }
 
   &.inactive {
     background-color: rgba(239, 68, 68, 0.1);
     color: #991b1b;
+    border: 1px solid rgba(239, 68, 68, 0.2);
 
-    &::before {
-      background-color: #ef4444;
+    svg {
+      color: #ef4444;
     }
   }
 }
 
-// Action buttons container
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
+
 
 // Role badges
 .role-badge {
@@ -364,18 +569,107 @@ $transition: all 0.2s ease-in-out;
   }
 }
 
+// Action icons container
+.action-icons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+// Icon buttons
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: $transition;
+  position: relative;
+  min-width: auto;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+    transition: $transition;
+    flex-shrink: 0;
+  }
+  
+  .btn-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.3);
+  }
+  
+  // Success icon (Activate)
+  &.icon-success {
+    color: $success-color;
+    
+    &:hover {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: $success-hover;
+    }
+  }
+  
+  // Warning icon (Deactivate)
+  &.icon-warning {
+    color: $warning-color;
+    
+    &:hover {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: $warning-hover;
+    }
+  }
+  
+  // Edit icon
+  &.icon-edit {
+    color: $esprit-red;
+    
+    &:hover {
+      background-color: rgba(220, 53, 69, 0.1);
+      color: $esprit-red-hover;
+    }
+  }
+  
+  // Delete icon
+  &.icon-delete {
+    color: $danger-color;
+    
+    &:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: $danger-hover;
+    }
+  }
+}
+
 // User avatar
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, $primary-color 0%, $primary-hover 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
+  box-shadow: $shadow-sm;
+  border: 2px solid white;
 }
 
 .user-info {
@@ -383,8 +677,22 @@ $transition: all 0.2s ease-in-out;
   align-items: center;
   gap: 0.75rem;
   
+  .user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
   .username {
-    font-weight: 500;
+    font-weight: 600;
+    color: $gray-900;
+    font-size: 0.875rem;
+  }
+  
+  .user-id {
+    font-size: 0.75rem;
+    color: $gray-500;
+    font-weight: 400;
   }
 }
 
@@ -400,6 +708,34 @@ $transition: all 0.2s ease-in-out;
     align-items: stretch;
   }
 
+  .search-section {
+    .search-container {
+      .filter-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        
+        .filter-label {
+          text-align: center;
+        }
+        
+        .status-filter-buttons {
+          justify-content: center;
+          
+          .filter-btn {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+          }
+        }
+        
+        .clear-filters-btn {
+          align-self: center;
+        }
+      }
+    }
+  }
+
   .table-container {
     overflow-x: auto;
   }
@@ -408,16 +744,123 @@ $transition: all 0.2s ease-in-out;
     min-width: 800px;
   }
 
-  .action-buttons {
+  .action-icons {
+    gap: 0.5rem;
     flex-direction: column;
-    gap: 0.25rem;
-
-    .btn {
-      width: 100%;
-      justify-content: center;
+    
+    .icon-btn {
+      padding: 0.375rem 0.75rem;
+      
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+      
+      .btn-text {
+        font-size: 0.7rem;
+      }
     }
   }
 }
+
+// Pagination styles
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: white;
+  border-top: 1px solid $esprit-light-gray;
+  border-radius: 0 0 $border-radius $border-radius;
+  
+  .pagination-info {
+    color: $esprit-dark-gray;
+    font-size: 0.875rem;
+  }
+  
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    
+    .pagination-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid $esprit-light-gray;
+      background: white;
+      color: $esprit-red;
+      border-radius: $border-radius;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: $transition;
+      
+      &:hover:not(:disabled) {
+        background: $esprit-red;
+        color: $esprit-white;
+        border-color: $esprit-red;
+      }
+      
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+    
+    .page-numbers {
+      display: flex;
+      gap: 0.25rem;
+      
+      .page-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 1px solid $esprit-light-gray;
+        background: white;
+        color: $esprit-dark-gray;
+        border-radius: $border-radius;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: $transition;
+        
+        &:hover {
+          background: rgba(220, 53, 69, 0.1);
+          border-color: $esprit-red;
+          color: $esprit-red;
+        }
+        
+                 &.active {
+           background: $esprit-red;
+           color: $esprit-white;
+           border-color: $esprit-red;
+         }
+         
+         &.ellipsis {
+           cursor: default;
+           background: transparent;
+           border: none;
+           color: $esprit-dark-gray;
+           
+           &:hover {
+             background: transparent;
+             border: none;
+             color: $esprit-dark-gray;
+           }
+         }
+       }
+     }
+   }
+ }
 
 @media (max-width: 480px) {
   .container h2 {
@@ -429,6 +872,20 @@ $transition: all 0.2s ease-in-out;
     tbody td {
       padding: 0.75rem;
       font-size: 0.75rem;
+    }
+  }
+  
+  .pagination-container {
+    flex-direction: column;
+    gap: 1rem;
+    
+    .pagination-controls {
+      flex-direction: column;
+      gap: 0.75rem;
+      
+      .page-numbers {
+        order: -1;
+      }
     }
   }
 }

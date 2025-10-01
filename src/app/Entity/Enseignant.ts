@@ -19,6 +19,7 @@ export interface Enseignant {
   moduleLibelle?: string;
 
   grade?: string;
+  statut?: 'VACATAIRE' | 'PERMANENT'; // Nouveau champ pour le statut
   unitePedagogique?: UnitePedagogique; 
   unitePedagogiqueLibelle?: string; // pour l'affichage
 }

@@ -49,6 +49,8 @@ export class ExamenChronoComponent implements OnInit {
   examenForm: FormGroup;
   examens: ExamenChrono[] = [];
   modules: MyModule[] = [];
+  allModules: MyModule[] = []; // Store all modules for filtering
+  filteredModules: MyModule[] = []; // Modules filtered by selected session
   groupes: Groupe[] = [];
   sessions: Session[] = [];
   enseignants: Enseignant[] = [];
@@ -109,6 +111,14 @@ export class ExamenChronoComponent implements OnInit {
     this.notificationService.connect(enseignantId);
   }
 
+    // Session selection triggers module filtering
+    this.examenForm.get('sessionId')?.valueChanges.subscribe(sessionId => {
+      console.log('Session changed to:', sessionId);
+      this.filterModulesBySession(sessionId);
+      this.groupes = [];
+      this.examenForm.patchValue({ moduleId: '', dateExamen: '', seance: '' });
+    });
+
     this.examenForm.get('periode')?.valueChanges.subscribe(periode => {
       this.loadModulesByPeriode(periode);
       this.groupes = [];
@@ -156,7 +166,9 @@ export class ExamenChronoComponent implements OnInit {
   loadModulesByPeriode(periode: string): void {
     this.affectationService.getModulesByPeriode(periode).subscribe({
       next: modules => {
-        this.modules = modules;
+        this.allModules = modules; // Store all modules
+        this.modules = modules; // Keep current behavior for now
+        this.filteredModules = modules; // Initialize filtered modules
         this.isLoading = false;
       },
       error: err => {
@@ -176,17 +188,54 @@ export class ExamenChronoComponent implements OnInit {
     });
   }
 
+  filterModulesBySession(sessionId: number): void {
+    console.log('Filtering modules for session:', sessionId);
+    
+    if (!sessionId) {
+      this.filteredModules = this.allModules;
+      this.modules = this.allModules;
+      return;
+    }
+
+    // Find the selected session
+    const selectedSession = this.sessions.find(s => s.id === sessionId);
+    if (!selectedSession || !selectedSession.moduleIds) {
+      console.log('No session found or no modules assigned to session');
+      this.filteredModules = [];
+      this.modules = [];
+      return;
+    }
+
+    console.log('Session modules:', selectedSession.moduleIds);
+    
+    // Filter modules that are assigned to this session
+    this.filteredModules = this.allModules.filter(module => 
+      selectedSession.moduleIds!.includes(module.id!)
+    );
+    
+    this.modules = this.filteredModules; // Update the modules array used in template
+    
+    console.log('Filtered modules:', this.filteredModules.map(m => m.libelleModule));
+  }
+
   loadExamens(): void {
     this.examenService.getAllExamens().subscribe({
       next: examens => {
         this.examens = examens;
+        console.log('Examens chargés:', examens);
 
-        const salleIdsAll = examens.flatMap(e => e.salleIds);
+        // Filtrer et récupérer tous les IDs de salles valides
+        const salleIdsAll = examens
+          .filter(e => e.salleIds && Array.isArray(e.salleIds))
+          .flatMap(e => e.salleIds)
+          .filter(id => id !== null && id !== undefined);
         const uniqueSalleIds = Array.from(new Set(salleIdsAll));
+        console.log('IDs de salles uniques trouvés:', uniqueSalleIds);
 
         if (uniqueSalleIds.length > 0) {
           this.salleService.getSallesByIds(uniqueSalleIds).subscribe({
             next: salles => {
+              console.log('Salles récupérées:', salles);
               const salleMap = new Map<number, string>();
               salles.forEach((s: Salle) => {
                 const fullSalleName = `Salle: ${s.bloc}${s.etage}${s.nom}`;
@@ -194,10 +243,16 @@ export class ExamenChronoComponent implements OnInit {
               });
 
               this.examens.forEach(exam => {
-                exam['salleNames'] = exam.salleIds
-                  .map(id => salleMap.get(id) || '')
-                  .filter(n => n)
-                  .join(', ');
+                if (exam.salleIds && Array.isArray(exam.salleIds)) {
+                  exam['salleNames'] = exam.salleIds
+                    .map(id => salleMap.get(id) || '')
+                    .filter(n => n)
+                    .join(', ');
+                  console.log(`Examen ${exam.id}: salleIds=${exam.salleIds}, salleNames=${exam['salleNames']}`);
+                } else {
+                  exam['salleNames'] = '';
+                  console.log(`Examen ${exam.id}: pas de salleIds ou salleIds invalide`);
+                }
               });
 
               this.buildCalendarEvents();
@@ -213,6 +268,7 @@ export class ExamenChronoComponent implements OnInit {
             }
           });
         } else {
+          console.log('Aucun ID de salle trouvé dans les examens');
           this.examens.forEach(exam => (exam['salleNames'] = ''));
           this.buildCalendarEvents();
           this.updateAffectedEnseignants();
@@ -228,33 +284,38 @@ export class ExamenChronoComponent implements OnInit {
 
   buildCalendarEvents(): void {
     this.calendarEvents = {};
-
+  
     this.examens.forEach(examen => {
+      if (!examen) return;
+  
       const dateKey = examen.dateExamen;
       const seanceKey = examen.seance;
+  
+      if (!this.calendarEvents[dateKey]) this.calendarEvents[dateKey] = {};
+      if (!this.calendarEvents[dateKey][seanceKey]) this.calendarEvents[dateKey][seanceKey] = [];
+  
+      const fullGroup = examen.groupe
+        ? `${examen.groupe.niveau}-${examen.groupe.optionGroupe}-${examen.groupe.nomClasse}`
+        : 'Groupe inconnu';
 
-      if (!this.calendarEvents[dateKey]) {
-        this.calendarEvents[dateKey] = {};
-      }
-      if (!this.calendarEvents[dateKey][seanceKey]) {
-        this.calendarEvents[dateKey][seanceKey] = [];
-      }
-
-      const fullGroup = `${examen.groupe.niveau}-${examen.groupe.optionGroupe}-${examen.groupe.nomClasse}`;
+      // Récupérer les noms de salles avec vérification
+      const salleNames = examen['salleNames'] || '';
+      console.log(`Construction événement pour examen ${examen.id}: salleNames="${salleNames}"`);
+  
       this.calendarEvents[dateKey][seanceKey].push({
         id: examen.id,
-        title: examen.module.libelleModule,
+        title: examen.module?.libelleModule || 'Module inconnu',
         date: examen.dateExamen,
         seance: examen.seance,
-        module: examen.module.libelleModule,
+        module: examen.module?.libelleModule || 'Module inconnu',
         groupe: fullGroup,
-        enseignants: examen.enseignants.map(e => e.nom).join(', '),
-        salles: examen['salleNames'] || '',
+        enseignants: examen.enseignants?.filter(e => e != null).map(e => e.nom).join(', ') || 'Aucun',
+        salles: salleNames,
         periode: examen.periode || 'PERIODE_1'
       });
     });
   }
-
+  
   updateAffectedEnseignants(): void {
     const affectedIds = new Set<number>();
     this.examens.forEach(ex => {
@@ -318,13 +379,29 @@ export class ExamenChronoComponent implements OnInit {
         // Backend automatically sends notifications to assigned enseignants only
         console.log('Examens créés avec succès:', examens);
         
+        // Extract assigned enseignants from created exams
+        const assignedEnseignants = examens.flatMap(exam => exam.enseignants || []);
+        const uniqueEnseignants = assignedEnseignants.filter((enseignant, index, self) => 
+          index === self.findIndex(e => e.id === enseignant.id)
+        );
+        
+        console.log('Enseignants assignés aux examens:', uniqueEnseignants);
+        
         // Show success message to the creator
         const module = this.modules.find(m => m.id === +formValue.moduleId);
         const moduleName = module ? module.libelleModule : 'Module inconnu';
+        
+        const enseignantNames = uniqueEnseignants.map(ens => `${ens.nom} ${ens.prenom || ''}`).join(', ');
+        
         this.notificationService.addNotification(
-          `Examens créés avec succès pour ${moduleName} le ${formValue.dateExamen} à ${formValue.seance}. Les enseignants assignés ont été notifiés.`, 
+          `Examens créés avec succès pour ${moduleName} le ${formValue.dateExamen} à ${formValue.seance}. 
+           Enseignants assignés: ${enseignantNames}. 
+           Les notifications ont été envoyées via WebSocket.`, 
           'success'
         );
+        
+        // Test WebSocket connection status
+        this.testWebSocketConnection();
         
         this.loadExamens();
         this.toggleForm();
@@ -346,6 +423,9 @@ export class ExamenChronoComponent implements OnInit {
         sessionId: this.sessions.length > 0 ? this.sessions[0].id : ''
       });
       this.groupes = [];
+      // Reset filtered modules to show all modules
+      this.filteredModules = this.allModules;
+      this.modules = this.allModules;
     }
   }
 
@@ -425,7 +505,8 @@ export class ExamenChronoComponent implements OnInit {
   }
 
   getEventTooltip(event: CalendarEvent): string {
-    return `${event.module} - ${event.groupe} - ${event.enseignants} - Salle: ${event.salles}`;
+    const sallesInfo = event.salles && event.salles.trim() ? event.salles : 'Aucune salle assignée';
+    return `${event.module} - ${event.groupe} - ${event.enseignants} - Salle: ${sallesInfo}`;
   }
 
   getHiddenEventsCount(dateKey: string, seance: string): number {
@@ -460,14 +541,19 @@ export class ExamenChronoComponent implements OnInit {
   testWebSocketConnection(): void {
     const enseignantId = Number(localStorage.getItem('id'));
     if (enseignantId) {
+      const connectionStatus = this.notificationService.getConnectionStatus();
       if (this.notificationService.isConnected()) {
-        this.notificationService.addNotification(`WebSocket is connected for enseignant ${enseignantId}`, 'success');
+        this.notificationService.addNotification(`WebSocket is connected for enseignant ${enseignantId} (Status: ${connectionStatus})`, 'success');
         // Send a test message
         this.notificationService.sendGeneralNotification('Test message from frontend');
       } else {
-        this.notificationService.addNotification(`WebSocket is not connected for enseignant ${enseignantId}`, 'warning');
+        this.notificationService.addNotification(`WebSocket is not connected for enseignant ${enseignantId} (Status: ${connectionStatus})`, 'warning');
         // Try to reconnect
         this.notificationService.connect(enseignantId);
+        setTimeout(() => {
+          const newStatus = this.notificationService.getConnectionStatus();
+          this.notificationService.addNotification(`Reconnection attempt completed. Status: ${newStatus}`, 'info');
+        }, 2000);
       }
     } else {
       this.notificationService.addNotification('No enseignant ID found for WebSocket test', 'warning');
@@ -478,7 +564,7 @@ export class ExamenChronoComponent implements OnInit {
   testExamCreationNotification(): void {
     // Test with specific enseignant IDs (you can change these to test with different enseignants)
     const testEnseignantIds = [1, 2]; // Example: Iheb (ID: 1) and Samara (ID: 2)
-    
+
     if (testEnseignantIds.length > 0) {
       // Send specific test notification to each enseignant
       testEnseignantIds.forEach(enseignantId => {
@@ -504,6 +590,47 @@ export class ExamenChronoComponent implements OnInit {
     }
   }
 
+  // Test WebSocket connection for assigned enseignants
+  testAssignedEnseignantsWebSocket(): void {
+    // Get all enseignants assigned to recent exams
+    const recentExamens = this.examens.slice(-5); // Last 5 exams
+    const assignedEnseignantIds = new Set<number>();
+    
+    recentExamens.forEach(examen => {
+      if (examen.enseignants) {
+        examen.enseignants.forEach(ens => assignedEnseignantIds.add(ens.id!));
+      }
+    });
+
+    if (assignedEnseignantIds.size === 0) {
+      this.notificationService.addNotification('Aucun enseignant assigné aux examens récents pour tester', 'warning');
+      return;
+    }
+
+    const enseignantIds = Array.from(assignedEnseignantIds);
+    this.notificationService.addNotification(
+      `Test WebSocket pour ${enseignantIds.length} enseignants assignés: ${enseignantIds.join(', ')}`, 
+      'info'
+    );
+
+    // Test notification to each assigned enseignant
+    enseignantIds.forEach(enseignantId => {
+      const enseignant = this.enseignants.find(ens => ens.id === enseignantId);
+      const enseignantName = enseignant ? `${enseignant.nom} ${enseignant.prenom || ''}` : `Enseignant ${enseignantId}`;
+      
+      const testMessage = `Test WebSocket pour ${enseignantName} - ${new Date().toLocaleTimeString()}`;
+      
+      this.notificationService.sendNotificationToEnseignants([enseignantId], testMessage).subscribe({
+        next: (response) => {
+          console.log(`WebSocket test sent to ${enseignantName} (ID: ${enseignantId}):`, response);
+        },
+        error: (err) => {
+          console.error(`WebSocket test failed for ${enseignantName} (ID: ${enseignantId}):`, err);
+        }
+      });
+    });
+  }
+
   // Test backend notifications directly
   testBackendNotifications(): void {
     // Test the backend endpoint directly
@@ -516,6 +643,124 @@ export class ExamenChronoComponent implements OnInit {
         console.error('Backend test error:', err);
         this.notificationService.addNotification('Backend notifications test failed', 'error');
       }
+    });
+  }
+
+  // Test backend notification to specific enseignant
+  testBackendNotificationToEnseignant(enseignantId: number): void {
+    this.http.post(`http://localhost:8090/examen-chrono/test-notification/${enseignantId}`, {}).subscribe({
+      next: (response) => {
+        console.log('Backend notification test response:', response);
+        this.notificationService.addNotification(`Backend notification sent to enseignant ${enseignantId}`, 'success');
+      },
+      error: (err) => {
+        console.error('Backend notification test error:', err);
+        this.notificationService.addNotification(`Backend notification failed for enseignant ${enseignantId}`, 'error');
+      }
+    });
+  }
+
+  // Test backend notification to all enseignants
+  testBackendNotificationAll(): void {
+    this.http.post('http://localhost:8090/examen-chrono/test-notification-all', {}).subscribe({
+      next: (response) => {
+        console.log('Backend notification all test response:', response);
+        this.notificationService.addNotification('Backend notifications sent to all enseignants', 'success');
+      },
+      error: (err) => {
+        console.error('Backend notification all test error:', err);
+        this.notificationService.addNotification('Backend notifications failed for all enseignants', 'error');
+      }
+    });
+  }
+
+  // Comprehensive WebSocket diagnostic
+  diagnoseWebSocketIssue(): void {
+    const enseignantId = Number(localStorage.getItem('id'));
+    
+    this.notificationService.addNotification('=== DIAGNOSTIC WEBSOCKET ===', 'info');
+    
+    // 1. Check current user
+    this.notificationService.addNotification(`Utilisateur connecté: ${enseignantId || 'Non trouvé'}`, 'info');
+    
+    // 2. Check WebSocket connection
+    const connectionStatus = this.notificationService.getConnectionStatus();
+    this.notificationService.addNotification(`Statut WebSocket: ${connectionStatus}`, 
+      connectionStatus === 'Connected' ? 'success' : 'warning');
+    
+    // 3. Check recent exams and assigned teachers
+    const recentExamens = this.examens.slice(-3);
+    this.notificationService.addNotification(`Examens récents: ${recentExamens.length}`, 'info');
+    
+    const assignedEnseignantIds = new Set<number>();
+    recentExamens.forEach(examen => {
+      if (examen.enseignants) {
+        examen.enseignants.forEach(ens => assignedEnseignantIds.add(ens.id!));
+      }
+    });
+    
+    this.notificationService.addNotification(`Enseignants assignés récemment: ${assignedEnseignantIds.size}`, 'info');
+    
+    // 4. Test notification to assigned teachers
+    if (assignedEnseignantIds.size > 0) {
+      const enseignantIds = Array.from(assignedEnseignantIds);
+      this.notificationService.addNotification(
+        `Test notification vers enseignants: ${enseignantIds.join(', ')}`, 'info'
+      );
+      
+      // Send test notification
+      this.notificationService.sendNotificationToEnseignants(
+        enseignantIds, 
+        `Test diagnostic WebSocket - ${new Date().toLocaleTimeString()}`
+      ).subscribe({
+        next: (response) => {
+          this.notificationService.addNotification('Notifications envoyées avec succès', 'success');
+        },
+        error: (err) => {
+          this.notificationService.addNotification(`Erreur envoi notifications: ${err.message}`, 'error');
+        }
+      });
+    } else {
+      this.notificationService.addNotification('Aucun enseignant assigné récemment pour tester', 'warning');
+    }
+    
+    // 5. Check backend WebSocket endpoint
+    this.http.get('http://localhost:8090/examen-chrono/surveillance-table').subscribe({
+      next: (response) => {
+        this.notificationService.addNotification('Backend WebSocket endpoint accessible', 'success');
+      },
+      error: (err) => {
+        this.notificationService.addNotification(`Backend WebSocket endpoint inaccessible: ${err.message}`, 'error');
+      }
+    });
+    
+    this.notificationService.addNotification('=== FIN DIAGNOSTIC ===', 'info');
+  }
+
+  // Test notifications backend pour enseignants assignés
+  testBackendNotificationsForAssignedTeachers(): void {
+    const recentExamens = this.examens.slice(-3);
+    const assignedEnseignantIds = new Set<number>();
+    
+    recentExamens.forEach(examen => {
+      if (examen.enseignants) {
+        examen.enseignants.forEach(ens => assignedEnseignantIds.add(ens.id!));
+      }
+    });
+
+    if (assignedEnseignantIds.size === 0) {
+      this.notificationService.addNotification('Aucun enseignant assigné récemment pour tester', 'warning');
+      return;
+    }
+
+    const enseignantIds = Array.from(assignedEnseignantIds);
+    this.notificationService.addNotification(
+      `Test notifications backend pour ${enseignantIds.length} enseignants assignés`, 'info'
+    );
+
+    // Tester chaque enseignant assigné
+    enseignantIds.forEach(enseignantId => {
+      this.testBackendNotificationToEnseignant(enseignantId);
     });
   }
 
@@ -533,4 +778,51 @@ export class ExamenChronoComponent implements OnInit {
   //
   // Example: If Iheb and Samara are assigned to an exam, only they receive notifications
   // Other enseignants will NOT receive notifications for this exam
+
+  // Méthode de débogage pour vérifier l'état des examens et leurs salles
+  debugExamensState(): void {
+    console.log('=== DÉBOGAGE ÉTAT DES EXAMENS ===');
+    this.examens.forEach((exam, index) => {
+      console.log(`Examen ${index + 1} (ID: ${exam.id}):`);
+      console.log(`  - Module: ${exam.module?.libelleModule}`);
+      console.log(`  - Date: ${exam.dateExamen}`);
+      console.log(`  - Séance: ${exam.seance}`);
+      console.log(`  - salleIds:`, exam.salleIds);
+      console.log(`  - salleNames:`, exam['salleNames']);
+      console.log(`  - Enseignants:`, exam.enseignants?.map(e => e.nom));
+      console.log('  ---');
+    });
+    
+    console.log('=== ÉVÉNEMENTS CALENDRIER ===');
+    Object.keys(this.calendarEvents).forEach(dateKey => {
+      Object.keys(this.calendarEvents[dateKey]).forEach(seanceKey => {
+        this.calendarEvents[dateKey][seanceKey].forEach(event => {
+          console.log(`Événement ${event.id}: ${event.module} - ${event.salles}`);
+        });
+      });
+    });
+
+    // Vérification spécifique des salles dans les événements
+    console.log('=== VÉRIFICATION SPÉCIFIQUE DES SALLES ===');
+    this.examens.forEach(exam => {
+      const event = this.findEventInCalendar(exam.id);
+      if (event) {
+        console.log(`Examen ${exam.id}:`);
+        console.log(`  - salleNames dans examen: "${exam['salleNames']}"`);
+        console.log(`  - salles dans événement: "${event.salles}"`);
+        console.log(`  - Égalité: ${exam['salleNames'] === event.salles}`);
+      }
+    });
+  }
+
+  // Méthode utilitaire pour trouver un événement dans le calendrier
+  private findEventInCalendar(examenId: number): CalendarEvent | null {
+    for (const dateKey in this.calendarEvents) {
+      for (const seanceKey in this.calendarEvents[dateKey]) {
+        const event = this.calendarEvents[dateKey][seanceKey].find(e => e.id === examenId);
+        if (event) return event;
+      }
+    }
+    return null;
+  }
 }

@@ -1,216 +1,258 @@
-// Update Enseignant Form Styles
+// Variables
+$primary-color: #2563eb;
+$primary-hover: #1d4ed8;
+$success-color: #10b981;
+$success-hover: #059669;
+$danger-color: #ef4444;
+$danger-hover: #dc2626;
+$warning-color: #f59e0b;
+$warning-hover: #d97706;
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-400: #9ca3af;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #111827;
+$border-radius: 8px;
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$transition: all 0.2s ease-in-out;
+
+// ESPRIT Colors
+$esprit-red: #dc3545;
+$esprit-red-hover: #c82333;
+$esprit-white: #FCFCFC;
+$esprit-black: #080808;
+$esprit-light-gray: #C0B8B9;
+$esprit-dark-gray: #727272;
+
 .update-enseignant-container {
-  max-width: 700px;
-  margin: 2rem auto;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 2rem;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e8ecef;
+  background-color: $gray-50;
+  margin-top: -4.2rem; 
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
-  // Title styling
-  h2 {
-    color: #2c3e50;
-    text-align: center;
-    margin-bottom: 2rem;
-    font-weight: 700;
-    font-size: 1.8rem;
-    position: relative;
-    
-    &::after {
-      content: '';
-      display: block;
-      width: 60px;
-      height: 3px;
-      background: linear-gradient(90deg, #3498db, #2980b9);
-      margin: 0.5rem auto 0;
-      border-radius: 2px;
-    }
-  }
+// Header section
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: $border-radius;
+  box-shadow: $shadow-sm;
+  border: 1px solid $gray-200;
 
-  // Form styling
-  form {
-    .form-group {
-      margin-bottom: 1.75rem;
-      position: relative;
+  .header-content {
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: $gray-900;
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
 
-      // Label styling
-      label {
-        display: block;
-        margin-bottom: 0.6rem;
-        font-weight: 600;
-        color: #34495e;
-        font-size: 0.95rem;
-        transition: color 0.3s ease;
+      &::before {
+        content: '👨‍🏫';
+        font-size: 1.5rem;
       }
 
-      // Input and select base styling
+      svg {
+        color: $primary-color;
+      }
+    }
+
+    .header-description {
+      color: $gray-600;
+      font-size: 0.875rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+}
+
+// Form container
+.form-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: $border-radius;
+  box-shadow: $shadow-sm;
+  border: 1px solid $gray-200;
+
+  .update-form {
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+
+    .form-group {
+      .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: $gray-700;
+        margin-bottom: 0.5rem;
+
+        svg {
+          color: $gray-500;
+          flex-shrink: 0;
+        }
+      }
+
       .form-control {
         width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        background-color: #fff;
-        line-height: 1.5;
+        padding: 0.75rem 1rem;
+        border: 2px solid $gray-200;
+        border-radius: $border-radius;
+        font-size: 0.875rem;
+        transition: $transition;
+        background: white;
+        color: $gray-900;
+
+        &::placeholder {
+          color: $gray-400;
+        }
 
         &:focus {
           outline: none;
-          border-color: #3498db;
-          box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
-          background-color: #fcfdff;
+          border-color: $esprit-red;
+          box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
         }
 
         &:hover:not(:focus) {
-          border-color: #bdc3c7;
+          border-color: $gray-300;
         }
 
-        // Placeholder styling
-        &::placeholder {
-          color: #7f8c8d;
-          opacity: 1;
-        }
-
-        // Angular validation states
-        &.ng-valid.ng-touched:not([value=""]):not(:placeholder-shown) {
-          border-color: #27ae60;
-          background-color: #f8fff9;
-          
-          &:focus {
-            border-color: #27ae60;
-            box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.1);
-          }
-        }
-
-        &.ng-invalid.ng-touched {
-          border-color: #e74c3c;
-          background-color: #fff8f8;
-          
-          &:focus {
-            border-color: #e74c3c;
-            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
-          }
-        }
-
-        // Disabled state
-        &:disabled {
-          background-color: #f8f9fa;
-          border-color: #e9ecef;
-          color: #6c757d;
-          cursor: not-allowed;
+        &.form-select {
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+          background-position: right 0.75rem center;
+          background-repeat: no-repeat;
+          background-size: 1.5em 1.5em;
+          padding-right: 2.5rem;
         }
       }
 
-      // Select specific styling
-      select.form-control {
-        cursor: pointer;
-        background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23495057'><path d='M8 11L3 6h10l-5 5z'/></svg>");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        background-size: 14px;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        padding-right: 2.5rem;
-
-        option {
-          padding: 0.5rem 1rem;
-          color: #495057;
-          
-          &:disabled {
-            color: #6c757d;
-            font-style: italic;
-          }
-        }
-      }
-
-      // Error message styling
-      .text-danger {
-        color: #e74c3c !important;
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
-        padding: 0.375rem 0.75rem;
-        background-color: #fdf2f2;
-        border-left: 3px solid #e74c3c;
-        border-radius: 0 4px 4px 0;
+      .error-message {
+        color: $danger-color;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
         display: flex;
         align-items: center;
-        animation: slideInError 0.3s ease-out;
+        gap: 0.25rem;
 
         &::before {
           content: '⚠';
-          margin-right: 0.5rem;
-          font-size: 1rem;
+          font-size: 0.875rem;
         }
-      }
-
-      // Focus effect for labels
-      .form-control:focus + label,
-      .form-control:focus ~ label {
-        color: #3498db;
       }
     }
 
-    // Submit button styling
-    .btn {
-      display: inline-block;
-      font-weight: 600;
-      text-align: center;
-      vertical-align: middle;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      padding: 1rem 2rem;
-      font-size: 1rem;
-      text-decoration: none;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      min-width: 200px;
-      position: relative;
-      overflow: hidden;
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      padding-top: 1.5rem;
+      border-top: 1px solid $gray-200;
 
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
+      @media (max-width: 768px) {
+        flex-direction: column-reverse;
+        gap: 0.75rem;
       }
 
-      &:hover:not(:disabled)::before {
-        left: 100%;
-      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: $border-radius;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: $transition;
+        box-shadow: $shadow-sm;
+        min-width: 140px;
+        justify-content: center;
 
-      &.btn-primary {
-        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-        color: #ffffff;
-        width: 100%;
-
-        &:hover:not(:disabled) {
-          background: linear-gradient(135deg, #2980b9 0%, #1f5f8b 100%);
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
-        }
-
-        &:active:not(:disabled) {
-          transform: translateY(0);
-          box-shadow: 0 2px 10px rgba(52, 152, 219, 0.2);
+        &:focus {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
         }
 
         &:disabled {
-          background: #95a5a6;
+          opacity: 0.6;
           cursor: not-allowed;
-          opacity: 0.7;
-          transform: none;
-          box-shadow: none;
+          transform: none !important;
+        }
 
-          &::before {
-            display: none;
+        svg {
+          width: 16px;
+          height: 16px;
+          flex-shrink: 0;
+        }
+
+        // Primary button
+        &.btn-primary {
+          background-color: $esprit-red;
+          color: white;
+
+          &:hover:not(:disabled) {
+            background-color: $esprit-red-hover;
+            transform: translateY(-1px);
+            box-shadow: $shadow-md;
+          }
+
+          &:focus {
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+          }
+
+          .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+        }
+
+        // Secondary button
+        &.btn-secondary {
+          background-color: white;
+          color: $esprit-dark-gray;
+          border: 2px solid $esprit-light-gray;
+
+          &:hover:not(:disabled) {
+            background-color: $gray-50;
+            border-color: $esprit-dark-gray;
+            transform: translateY(-1px);
+            box-shadow: $shadow-md;
+          }
+
+          &:focus {
+            box-shadow: 0 0 0 3px rgba(192, 184, 185, 0.3);
           }
         }
       }
@@ -218,120 +260,29 @@
   }
 }
 
-// Animations
-@keyframes slideInError {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+// Loading spinner animation
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// Container animation
-.update-enseignant-container {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-// Responsive Design
-@media (max-width: 768px) {
+// Responsive design
+@media (max-width: 640px) {
   .update-enseignant-container {
-    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .header-section {
     padding: 1.5rem;
 
-    h2 {
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    form {
-      .form-group {
-        margin-bottom: 1.5rem;
-
-        .form-control {
-          padding: 0.75rem;
-          font-size: 0.95rem;
-        }
-
-        label {
-          font-size: 0.9rem;
-        }
-      }
-
-      .btn {
-        padding: 0.875rem 1.5rem;
-        font-size: 0.95rem;
-        min-width: auto;
+    .header-content {
+      h2 {
+        font-size: 1.5rem;
       }
     }
   }
-}
 
-@media (max-width: 480px) {
-  .update-enseignant-container {
-    margin: 0.5rem;
-    padding: 1rem;
-
-    h2 {
-      font-size: 1.3rem;
-      margin-bottom: 1.25rem;
-    }
-
-    form {
-      .form-group {
-        margin-bottom: 1.25rem;
-
-        .form-control {
-          padding: 0.625rem;
-          font-size: 0.9rem;
-        }
-
-        label {
-          font-size: 0.85rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .text-danger {
-          font-size: 0.8rem;
-          padding: 0.3rem 0.6rem;
-        }
-      }
-
-      .btn {
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-      }
-    }
-  }
-}
-
-// Loading state (optional)
-.form-group.loading {
-  .form-control {
-    background-image: linear-gradient(90deg, transparent 25%, rgba(52, 152, 219, 0.1) 50%, transparent 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-  }
-}
-
-@keyframes loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
+  .form-container {
+    padding: 1.5rem;
   }
 }

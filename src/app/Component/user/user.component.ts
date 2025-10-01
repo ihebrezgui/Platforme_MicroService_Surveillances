@@ -16,9 +16,16 @@ import { User } from '../../Entity/User';
 })
 export class UserComponent implements OnInit {
   users: User[] = [];
+  filteredUsers: User[] = [];
   isLoading: boolean = false;
   role: string = '';
   currentUserId: number = 0;
+  searchTerm: string = '';
+  statusFilter: 'all' | 'active' | 'inactive' = 'all';
+  
+  // Pagination properties
+  currentPage: number = 1;
+  itemsPerPage: number = 15;
 
   constructor(private userService: UserServiceService, private router: Router) {
     // Récupérer role et id de l'utilisateur connecté depuis localStorage
@@ -40,6 +47,7 @@ export class UserComponent implements OnInit {
         } else {
           this.users = data;
         }
+        this.filteredUsers = [...this.users];
         this.isLoading = false;
       },
       error: (err) => {
@@ -167,6 +175,60 @@ export class UserComponent implements OnInit {
     this.loadUsers();
   }
 
+  // Search functionality
+  onSearchChange(): void {
+    this.applyFilters();
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.applyFilters();
+  }
+
+  // Status filter functionality
+  onStatusFilterChange(status: 'all' | 'active' | 'inactive'): void {
+    this.statusFilter = status;
+    this.applyFilters();
+  }
+
+  // Apply both search and status filters
+  applyFilters(): void {
+    let filtered = [...this.users];
+
+    // Apply status filter
+    if (this.statusFilter !== 'all') {
+      filtered = filtered.filter(user => {
+        if (this.statusFilter === 'active') {
+          return user.active === true;
+        } else if (this.statusFilter === 'inactive') {
+          return user.active === false;
+        }
+        return true;
+      });
+    }
+
+    // Apply search filter
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(user => 
+        user.username?.toLowerCase().includes(term) ||
+        user.email?.toLowerCase().includes(term) ||
+        user.matricule?.toLowerCase().includes(term) ||
+        user.role?.toLowerCase().includes(term)
+      );
+    }
+
+    this.filteredUsers = filtered;
+    this.currentPage = 1; // Reset to first page when filtering
+  }
+
+  clearAllFilters(): void {
+    this.searchTerm = '';
+    this.statusFilter = 'all';
+    this.filteredUsers = [...this.users];
+    this.currentPage = 1;
+  }
+
   getActiveUsersCount(): number {
     return this.users.filter(user => user.active).length;
   }
@@ -187,5 +249,81 @@ export class UserComponent implements OnInit {
 
   sortUsers(column: string): void {
     console.log(`Sorting by ${column}`);
+  }
+
+  // Pagination methods
+  getPaginatedUsers(): User[] {
+    const startIndex = this.getStartIndex();
+    const endIndex = this.getEndIndex();
+    return this.filteredUsers.slice(startIndex, endIndex);
+  }
+
+  getStartIndex(): number {
+    return (this.currentPage - 1) * this.itemsPerPage;
+  }
+
+  getEndIndex(): number {
+    return Math.min(this.getStartIndex() + this.itemsPerPage, this.filteredUsers.length);
+  }
+
+  getTotalPages(): number {
+    return Math.ceil(this.filteredUsers.length / this.itemsPerPage);
+  }
+
+  getPageNumbers(): number[] {
+    const totalPages = this.getTotalPages();
+    const currentPage = this.currentPage;
+    const pages: number[] = [];
+
+    // Always show first page
+    if (totalPages > 0) {
+      pages.push(1);
+    }
+
+    // Show pages around current page
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+
+    // Add ellipsis if there's a gap
+    if (start > 2) {
+      pages.push(-1); // -1 represents ellipsis
+    }
+
+    // Add pages around current page
+    for (let i = start; i <= end; i++) {
+      if (i > 1 && i < totalPages) {
+        pages.push(i);
+      }
+    }
+
+    // Add ellipsis if there's a gap
+    if (end < totalPages - 1) {
+      pages.push(-2); // -2 represents ellipsis
+    }
+
+    // Always show last page if there's more than one page
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+
+    return pages;
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.getTotalPages()) {
+      this.currentPage++;
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.getTotalPages()) {
+      this.currentPage = page;
+    }
   }
 }
